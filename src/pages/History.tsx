@@ -358,7 +358,7 @@ const MONTHS = [
     width: "100%",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    alignItems: "flex-start",
   }}
 >
         HISTORY
@@ -539,14 +539,16 @@ const MONTHS = [
   </div>
 )}
       <div
-        style={{
-          opacity: 0.6,
-          marginBottom: "20px",
-          fontSize: "15px",
-        }}
-      >
-        {filteredTrades.length} {countLabel}
-      </div>
+  style={{
+    opacity: 0.6,
+    marginBottom: "20px",
+    fontSize: "18px",
+    fontWeight: 600,
+    letterSpacing: "-0.5px",
+  }}
+>
+  {filteredTrades.length} {countLabel}
+</div>
 
       {filteredTrades.length === 0 && (
         <div
@@ -572,18 +574,19 @@ const MONTHS = [
           <div style={{ overflowX: "auto" }}>
             <div style={{ minWidth: "100%" }}>
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.8fr 0.9fr 0.9fr 1.1fr 20px",
-                  gap: "16px",
-                  whiteSpace: "nowrap",
-                  padding: "14px 16px",
-                  color: "#8a8a8a",
-                  fontSize: "14px",
-                  letterSpacing: "0.04em",
-                  borderBottom: "1px solid #1f1f1f",
-                }}
-              >
+  style={{
+    display: "grid",
+    gridTemplateColumns: "1.8fr 0.9fr 0.9fr 1.1fr 20px",
+    gap: "16px",
+    whiteSpace: "nowrap",
+    padding: "14px 16px",
+    color: "#8a8a8a",
+    fontSize: "13px",
+    fontWeight: 600,
+    letterSpacing: "0.02em",
+    borderBottom: "1px solid #1f1f1f",
+  }}
+>
                 <div>Symbol</div>
                 <div>Type</div>
                 <div>Result</div>
