@@ -765,44 +765,49 @@ const MONTHS = [
     right: 0,
     display: "flex",
     gap: "10px",
-  }}
->
-              <button
-  type="button"
-  onClick={() => setSelectedTradeId(null)}
-  style={{
-    background: "#111",
-    color: "#fff",
-    border: "1px solid #333",
-    borderRadius: "10px",
-    width: "34px",
-    height: "34px",
-    cursor: "pointer",
-    fontSize: "18px",
-    display: "flex",
     alignItems: "center",
-    justifyContent: "center",
   }}
 >
-  ×
-</button>
+  {/* DELETE ПЕРВЫЙ */}
+  <button
+    type="button"
+    onClick={() => deleteTrade(selectedTrade.id)}
+    style={{
+      background: "transparent",
+      color: "#888",
+      border: "1px solid #333",
+      borderRadius: "12px",
+      padding: "10px 14px",
+      cursor: "pointer",
+      fontSize: "12px",
+      height: "34px",
+    }}
+  >
+    DELETE
+  </button>
 
-<button
-  type="button"
-  onClick={() => deleteTrade(selectedTrade.id)}
-  style={{
-    background: "transparent",
-    color: "#888",
-    border: "1px solid #333",
-    borderRadius: "12px",
-    padding: "10px 14px",
-    cursor: "pointer",
-    fontSize: "12px",
-  }}
->
-  DELETE
-</button>
-            </div>
+  {/* КРЕСТИК ВТОРОЙ */}
+  <button
+    type="button"
+    onClick={() => setSelectedTradeId(null)}
+    style={{
+      background: "#111",
+      color: "#fff",
+      border: "1px solid #333",
+      borderRadius: "12px",
+      width: "34px",
+      height: "34px",
+      cursor: "pointer",
+      fontSize: "18px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      lineHeight: 1,
+    }}
+  >
+    ×
+  </button>
+</div>
           </div>
 
           <div
