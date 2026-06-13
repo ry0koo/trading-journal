@@ -69,9 +69,9 @@ const loadTrades = async () => {
     >
       <h1
   style={{
-    fontSize: "78px",
+    fontSize: "72px",
     lineHeight: 0.88,
-    marginBottom: "50px",
+    marginBottom: "28px",
     fontWeight: 900,
     letterSpacing: "-3px",
     textAlign: "center",
@@ -93,7 +93,7 @@ const loadTrades = async () => {
 >
         <div
           style={{
-            fontSize: "96px",
+            fontSize: "88px",
             fontWeight: 900,
             lineHeight: 1,
             color:
