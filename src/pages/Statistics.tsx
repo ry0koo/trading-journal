@@ -1,3 +1,4 @@
+import { supabase } from "../lib/supabase";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Trade } from "../types/trade";
@@ -33,10 +34,42 @@ type StatsTrade = Trade & {
 
 function Statistics() {
   const navigate = useNavigate();
+  useEffect(() => {
+  loadTrades();
+}, []);
 
-  const trades: StatsTrade[] = JSON.parse(
-    localStorage.getItem("trades") || "[]"
-  );
+const loadTrades = async () => {
+  const { data, error } = await supabase
+    .from("trades")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const formattedTrades: StatsTrade[] =
+    data?.map((trade) => ({
+      id: trade.id,
+      instrument: trade.instrument,
+      direction: trade.direction,
+      result: trade.result,
+      comment: trade.comment || "",
+
+      beforeImage: trade.before_image,
+      afterImage: trade.after_image,
+
+      tradeDate: trade.trade_date,
+      session: trade.session,
+
+      createdAt: trade.created_at,
+    })) || [];
+
+  setTrades(formattedTrades);
+};
+
+  const [trades, setTrades] = useState<StatsTrade[]>([]);
 
   const years = useMemo(() => {
     const uniqueYears: number[] = [

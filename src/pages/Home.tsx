@@ -1,12 +1,44 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 import type { Trade } from "../types/trade";
 
 function Home() {
   const navigate = useNavigate();
 
-  const trades: Trade[] = JSON.parse(
-    localStorage.getItem("trades") || "[]"
-  );
+  const [trades, setTrades] = useState<Trade[]>([]);
+
+useEffect(() => {
+  loadTrades();
+}, []);
+
+const loadTrades = async () => {
+  const { data, error } = await supabase
+    .from("trades")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const formattedTrades: Trade[] =
+    data?.map((trade) => ({
+      id: trade.id,
+      instrument: trade.instrument,
+      direction: trade.direction,
+      result: Number(trade.result),
+      comment: trade.comment || "",
+
+      beforeImage: trade.before_image || "",
+      afterImage: trade.after_image || "",
+
+      createdAt: trade.created_at,
+    })) || [];
+
+  setTrades(formattedTrades);
+};
 
   const totalTrades = trades.length;
 
