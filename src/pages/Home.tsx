@@ -69,12 +69,13 @@ const loadTrades = async () => {
     >
       <h1
   style={{
-    fontSize: "88px",
+    fontSize: "78px",
     lineHeight: 0.88,
     marginBottom: "50px",
     fontWeight: 900,
     letterSpacing: "-3px",
-    textTransform: "uppercase",
+    textAlign: "center",
+    width: "100%",
   }}
 >
         TRADING
