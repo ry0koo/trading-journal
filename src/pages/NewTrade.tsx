@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 
 type ScreenshotType = "before" | "after";
 
@@ -62,31 +63,37 @@ function NewTrade() {
     readFileToDataUrl(file, type);
   };
 
-  const saveTrade = () => {
-    if (!result.trim()) return;
+  const saveTrade = async () => {
+  if (!result.trim()) return;
 
-    const existingTrades = JSON.parse(
-      localStorage.getItem("trades") || "[]"
-    );
+  const { error } = await supabase
+    .from("trades")
+    .insert([
+      {
+        instrument,
+        direction,
+        result: Number(result),
 
-    const newTrade = {
-      id: crypto.randomUUID(),
-      instrument,
-      tradeDate,
-      session,
-      direction,
-      result: Number(result),
-      comment,
-      beforeImage,
-      afterImage,
-      createdAt: tradeDateToIso(tradeDate),
-    };
+        session,
+        trade_date: tradeDate,
 
-    existingTrades.unshift(newTrade);
+        comment,
 
-    localStorage.setItem("trades", JSON.stringify(existingTrades));
-    navigate("/history");
-  };
+        before_image: beforeImage,
+        after_image: afterImage,
+
+        created_at: tradeDateToIso(tradeDate),
+      },
+    ]);
+
+  if (error) {
+    console.error(error);
+    alert("Error saving trade");
+    return;
+  }
+
+  navigate("/history");
+};
 
   const canSave = result.trim() !== "";
 
