@@ -1,6 +1,24 @@
 import { useState } from "react";
+import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { supabase } from "../lib/supabase";
+import {
+  activeSegmentStyle,
+  colors,
+  headerStyle,
+  inputStyle,
+  labelStyle,
+  pageStyle,
+  primaryButtonStyle,
+  quietButtonStyle,
+  radii,
+  sectionStyle,
+  segmentStyle,
+  segmentedRowStyle,
+  selectStyle,
+  titleStyle,
+} from "../ui";
 
 type ScreenshotType = "before" | "after";
 
@@ -13,7 +31,6 @@ function NewTrade() {
   const [direction, setDirection] = useState<"LONG" | "SHORT">("LONG");
   const [result, setResult] = useState("");
   const [comment, setComment] = useState("");
-
   const [beforeImage, setBeforeImage] = useState("");
   const [afterImage, setAfterImage] = useState("");
 
@@ -34,7 +51,7 @@ function NewTrade() {
   };
 
   const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: ChangeEvent<HTMLInputElement>,
     type: ScreenshotType
   ) => {
     const file = e.target.files?.[0];
@@ -42,13 +59,11 @@ function NewTrade() {
     if (!file) return;
 
     readFileToDataUrl(file, type);
-
-    // Allows selecting the same file again if needed.
     e.target.value = "";
   };
 
   const handlePaste = (
-    e: React.ClipboardEvent<HTMLDivElement>,
+    e: ClipboardEvent<HTMLDivElement>,
     type: ScreenshotType
   ) => {
     const items = Array.from(e.clipboardData.items);
@@ -64,163 +79,186 @@ function NewTrade() {
   };
 
   const saveTrade = async () => {
-  if (!result.trim()) return;
+    if (!result.trim()) return;
 
-  const { error } = await supabase
-    .from("trades")
-    .insert([
+    const { error } = await supabase.from("trades").insert([
       {
         instrument,
         direction,
         result: Number(result),
-
         session,
         trade_date: tradeDate,
-
         comment,
-
         before_image: beforeImage,
         after_image: afterImage,
-
         created_at: tradeDateToIso(tradeDate),
       },
     ]);
 
-  if (error) {
-    console.error(error);
-    alert("Error saving trade");
-    return;
-  }
+    if (error) {
+      console.error(error);
+      alert("Error saving trade");
+      return;
+    }
 
-  navigate("/history");
-};
+    navigate("/history");
+  };
 
   const canSave = result.trim() !== "";
 
   return (
-    <div
-      style={{
-        background: "#000",
-        minHeight: "100vh",
-        color: "#fff",
-        padding: "40px",
-        maxWidth: "900px",
-        margin: "0 auto",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: "64px",
-          marginBottom: "30px",
-        }}
-      >
-        NEW TRADE
-      </h1>
-
-      <label style={labelStyle}>Instrument</label>
-      <select
-        value={instrument}
-        onChange={(e) => setInstrument(e.target.value as "EURUSD" | "GBPUSD")}
-        style={inputStyle}
-      >
-        <option value="EURUSD">EURUSD</option>
-        <option value="GBPUSD">GBPUSD</option>
-      </select>
-
-      <label style={labelStyle}>Trade Date</label>
-      <input
-        type="date"
-        value={tradeDate}
-        onChange={(e) => setTradeDate(e.target.value)}
-        style={inputStyle}
-      />
-
-      <label style={labelStyle}>Session</label>
-      <select
-        value={session}
-        onChange={(e) => setSession(e.target.value)}
-        style={inputStyle}
-      >
-        <option value="Tokyo">Tokyo</option>
-        <option value="London">London</option>
-        <option value="New York">New York</option>
-        <option value="Out of session">Out of session</option>
-      </select>
-
-      <label style={labelStyle}>Direction</label>
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          marginBottom: "16px",
-        }}
-      >
+    <main style={pageStyle}>
+      <header style={headerStyle}>
         <button
           type="button"
-          style={direction === "LONG" ? activeButton : button}
-          onClick={() => setDirection("LONG")}
+          onClick={() => navigate("/")}
+          style={quietButtonStyle}
         >
-          LONG
+          BACK
         </button>
+        <h1 style={titleStyle}>NEW TRADE</h1>
+      </header>
 
-        <button
-          type="button"
-          style={direction === "SHORT" ? activeButton : button}
-          onClick={() => setDirection("SHORT")}
-        >
-          SHORT
-        </button>
+      <section style={{ ...sectionStyle, marginBottom: "14px" }}>
+        <div style={twoColumnStyle}>
+          <Field label="Instrument">
+            <select
+              value={instrument}
+              onChange={(e) =>
+                setInstrument(e.target.value as "EURUSD" | "GBPUSD")
+              }
+              style={selectStyle}
+            >
+              <option value="EURUSD">EURUSD</option>
+              <option value="GBPUSD">GBPUSD</option>
+            </select>
+          </Field>
+
+          <Field label="Trade Date">
+            <input
+              type="date"
+              value={tradeDate}
+              onChange={(e) => setTradeDate(e.target.value)}
+              style={{ ...inputStyle, marginBottom: 0 }}
+            />
+          </Field>
+        </div>
+
+        <Field label="Session">
+          <select
+            value={session}
+            onChange={(e) => setSession(e.target.value)}
+            style={selectStyle}
+          >
+            <option value="Tokyo">Tokyo</option>
+            <option value="London">London</option>
+            <option value="New York">New York</option>
+            <option value="Out of session">Out of session</option>
+          </select>
+        </Field>
+
+        <label style={labelStyle}>Direction</label>
+        <div style={segmentedRowStyle}>
+          <button
+            type="button"
+            style={direction === "LONG" ? activeSegmentStyle : segmentStyle}
+            onClick={() => setDirection("LONG")}
+          >
+            LONG
+          </button>
+
+          <button
+            type="button"
+            style={direction === "SHORT" ? activeSegmentStyle : segmentStyle}
+            onClick={() => setDirection("SHORT")}
+          >
+            SHORT
+          </button>
+        </div>
+
+        <label style={labelStyle}>Result (R)</label>
+        <input
+          type="number"
+          inputMode="decimal"
+          step="0.1"
+          placeholder="0.0"
+          value={result}
+          onChange={(e) => setResult(e.target.value)}
+          style={{
+            ...inputStyle,
+            marginBottom: 0,
+            fontSize: "36px",
+            fontWeight: 900,
+            lineHeight: 1,
+            textAlign: "center",
+          }}
+        />
+      </section>
+
+      <section style={{ ...sectionStyle, marginBottom: "14px" }}>
+        <label style={labelStyle}>Comment</label>
+        <textarea
+          placeholder="Comment"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          style={{
+            ...inputStyle,
+            height: "112px",
+            marginBottom: 0,
+            resize: "vertical",
+          }}
+        />
+      </section>
+
+      <div style={{ display: "grid", gap: "14px" }}>
+        <ScreenshotBlock
+          title="BEFORE"
+          image={beforeImage}
+          onPaste={(e) => handlePaste(e, "before")}
+          onFileChange={(e) => handleFileChange(e, "before")}
+        />
+
+        <ScreenshotBlock
+          title="AFTER"
+          image={afterImage}
+          onPaste={(e) => handlePaste(e, "after")}
+          onFileChange={(e) => handleFileChange(e, "after")}
+        />
       </div>
 
-      <label style={labelStyle}>Result (R)</label>
-      <input
-        type="number"
-        inputMode="decimal"
-        step="0.1"
-        placeholder="Result (R)"
-        value={result}
-        onChange={(e) => setResult(e.target.value)}
-        style={inputStyle}
-      />
-
-      <label style={labelStyle}>Comment</label>
-      <textarea
-        placeholder="Comment..."
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
+      <div
         style={{
-          ...inputStyle,
-          height: "120px",
-          resize: "vertical",
+          marginTop: "18px",
         }}
-      />
-
-      <ScreenshotBlock
-        title="BEFORE SCREENSHOT"
-        image={beforeImage}
-        onPaste={(e) => handlePaste(e, "before")}
-        onFileChange={(e) => handleFileChange(e, "before")}
-      />
-
-      <ScreenshotBlock
-        title="AFTER SCREENSHOT"
-        image={afterImage}
-        onPaste={(e) => handlePaste(e, "after")}
-        onFileChange={(e) => handleFileChange(e, "after")}
-      />
-
-      <button
-        type="button"
-        disabled={!canSave}
-        style={{
-          ...saveButton,
-          opacity: canSave ? 1 : 0.5,
-          cursor: canSave ? "pointer" : "not-allowed",
-        }}
-        onClick={saveTrade}
       >
-        SAVE TRADE
-      </button>
+        <button
+          type="button"
+          disabled={!canSave}
+          style={{
+            ...primaryButtonStyle,
+            opacity: canSave ? 1 : 0.45,
+            cursor: canSave ? "pointer" : "not-allowed",
+          }}
+          onClick={saveTrade}
+        >
+          SAVE TRADE
+        </button>
+      </div>
+    </main>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div style={{ marginBottom: "16px" }}>
+      <label style={labelStyle}>{label}</label>
+      {children}
     </div>
   );
 }
@@ -233,61 +271,83 @@ function ScreenshotBlock({
 }: {
   title: string;
   image: string;
-  onPaste: (e: React.ClipboardEvent<HTMLDivElement>) => void;
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onPaste: (e: ClipboardEvent<HTMLDivElement>) => void;
+  onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
-    <div
+    <section
       tabIndex={0}
       onPaste={onPaste}
       onClick={(e) => e.currentTarget.focus()}
-      style={uploadBlock}
+      style={sectionStyle}
     >
-      <h3
+      <div
         style={{
-          marginTop: 0,
-          marginBottom: "16px",
-          textAlign: "center",
-          fontSize: "18px",
-          fontWeight: 800,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "12px",
+          marginBottom: "12px",
         }}
       >
-        {title}
-      </h3>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: "13px",
+            fontWeight: 900,
+            letterSpacing: "0.08em",
+          }}
+        >
+          {title}
+        </h2>
+      </div>
 
-      <div style={pasteAreaStyle}>
+      <div
+        style={{
+          minHeight: "136px",
+          border: `1px dashed ${colors.borderStrong}`,
+          borderRadius: radii.md,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+          background: colors.bg,
+        }}
+      >
         {image ? (
-          <img
-            src={image}
-            alt=""
-            style={previewStyle}
-          />
+          <img src={image} alt="" style={previewStyle} />
         ) : (
           <div
             style={{
-              textAlign: "center",
-              opacity: 0.75,
-              lineHeight: 1.6,
+              color: colors.faint,
+              fontSize: "13px",
+              fontWeight: 800,
+              letterSpacing: "0.08em",
             }}
           >
-            Click here and press <b>Ctrl + V</b>
-            <br />
-            or choose a file below
+            NO IMAGE
           </div>
         )}
       </div>
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={onFileChange}
+      <label
         style={{
-          marginTop: "14px",
-          color: "#fff",
-          width: "100%",
+          ...quietButtonStyle,
+          display: "inline-flex",
+          marginTop: "12px",
+          fontSize: "12px",
+          padding: "10px 12px",
         }}
-      />
-    </div>
+      >
+        CHOOSE FILE
+        <input
+          type="file"
+          accept="image/*"
+          onChange={onFileChange}
+          style={{ display: "none" }}
+        />
+      </label>
+    </section>
   );
 }
 
@@ -302,77 +362,15 @@ function tradeDateToIso(dateValue: string) {
   return new Date(year, month - 1, day, 12, 0, 0, 0).toISOString();
 }
 
-const labelStyle = {
+const twoColumnStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "12px",
+};
+
+const previewStyle: CSSProperties = {
+  width: "100%",
   display: "block",
-  marginBottom: "8px",
-  fontSize: "14px",
-  opacity: 0.75,
-  letterSpacing: "0.5px",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "18px",
-  marginBottom: "16px",
-  background: "#111",
-  color: "#fff",
-  border: "1px solid #222",
-  borderRadius: "14px",
-  fontSize: "16px",
-  boxSizing: "border-box" as const,
-};
-
-const button = {
-  flex: 1,
-  padding: "18px",
-  background: "#111",
-  color: "#fff",
-  border: "1px solid #222",
-  borderRadius: "14px",
-  cursor: "pointer",
-  fontWeight: 700,
-};
-
-const activeButton = {
-  ...button,
-  border: "1px solid #fff",
-};
-
-const uploadBlock = {
-  background: "#111",
-  border: "1px solid #222",
-  borderRadius: "16px",
-  padding: "20px",
-  marginBottom: "20px",
-  outline: "none",
-};
-
-const pasteAreaStyle = {
-  minHeight: "140px",
-  border: "1px dashed #333",
-  borderRadius: "14px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "16px",
-};
-
-const previewStyle = {
-  width: "100%",
-  borderRadius: "12px",
-  display: "block",
-};
-
-const saveButton = {
-  width: "100%",
-  padding: "20px",
-  background: "#fff",
-  color: "#000",
-  border: "none",
-  borderRadius: "16px",
-  fontWeight: 800,
-  fontSize: "16px",
-  cursor: "pointer",
 };
 
 export default NewTrade;

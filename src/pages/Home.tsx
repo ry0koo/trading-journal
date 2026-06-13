@@ -1,192 +1,223 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { supabase } from "../lib/supabase";
 import type { Trade } from "../types/trade";
+import {
+  colors,
+  pageStyle,
+  quietButtonStyle,
+  resultColor,
+  sectionStyle,
+} from "../ui";
 
 function Home() {
   const navigate = useNavigate();
-
   const [trades, setTrades] = useState<Trade[]>([]);
 
-useEffect(() => {
-  loadTrades();
+  const loadTrades = async () => {
+    const { data, error } = await supabase
+      .from("trades")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  const channel = supabase
-    .channel("trades-home")
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "trades",
-      },
-      () => {
-        loadTrades();
-      }
-    )
-    .subscribe();
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-  return () => {
-    supabase.removeChannel(channel);
+    const formattedTrades: Trade[] =
+      data?.map((trade) => ({
+        id: trade.id,
+        instrument: trade.instrument,
+        direction: trade.direction,
+        result: Number(trade.result),
+        comment: trade.comment || "",
+        beforeImage: trade.before_image || "",
+        afterImage: trade.after_image || "",
+        createdAt: trade.created_at,
+      })) || [];
+
+    setTrades(formattedTrades);
   };
-}, []);
 
-const loadTrades = async () => {
-  const { data, error } = await supabase
-    .from("trades")
-    .select("*")
-    .order("created_at", { ascending: false });
+  useEffect(() => {
+    void Promise.resolve().then(loadTrades);
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+    const channel = supabase
+      .channel("trades-home")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "trades",
+        },
+        () => {
+          loadTrades();
+        }
+      )
+      .subscribe();
 
-  const formattedTrades: Trade[] =
-    data?.map((trade) => ({
-      id: trade.id,
-      instrument: trade.instrument,
-      direction: trade.direction,
-      result: Number(trade.result),
-      comment: trade.comment || "",
-
-      beforeImage: trade.before_image || "",
-      afterImage: trade.after_image || "",
-
-      createdAt: trade.created_at,
-    })) || [];
-
-  setTrades(formattedTrades);
-};
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const totalTrades = trades.length;
-
-  const totalResult = trades.reduce(
-    (sum, trade) => sum + trade.result,
-    0
-  );
-
-  const wins = trades.filter(
-    (trade) => trade.result > 0
-  ).length;
-
+  const totalResult = trades.reduce((sum, trade) => sum + trade.result, 0);
+  const wins = trades.filter((trade) => trade.result > 0).length;
   const winRate =
-    totalTrades === 0
-      ? 0
-      : Math.round((wins / totalTrades) * 100);
+    totalTrades === 0 ? 0 : Math.round((wins / totalTrades) * 100);
+  const tradeLabel = totalTrades === 1 ? "TRADE" : "TRADES";
 
-      const tradeLabel =
-  totalTrades === 1 ? "TRADE" : "TRADES";
+  return (
+    <main style={pageStyle}>
+      <section
+        style={{
+          minHeight: "calc(100vh - 48px)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          gap: "28px",
+        }}
+      >
+        <div>
+          <div
+            style={{
+              color: colors.muted,
+              fontSize: "12px",
+              fontWeight: 800,
+              letterSpacing: "0.08em",
+              marginBottom: "18px",
+            }}
+          >
+            TRADING JOURNAL
+          </div>
 
+          <div
+            style={{
+              ...sectionStyle,
+              padding: "28px 22px",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                color: colors.muted,
+                fontSize: "12px",
+                fontWeight: 800,
+                letterSpacing: "0.08em",
+                marginBottom: "14px",
+              }}
+            >
+              TOTAL RESULT
+            </div>
+
+            <div
+              style={{
+                fontSize: "74px",
+                fontWeight: 900,
+                lineHeight: 0.95,
+                color: resultColor(totalResult),
+              }}
+            >
+              {formatResult(totalResult)}
+            </div>
+
+            <div
+              style={{
+                marginTop: "18px",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+              }}
+            >
+              <MiniMetric value={String(totalTrades)} label={tradeLabel} />
+              <MiniMetric value={`${winRate}%`} label="WR" />
+            </div>
+          </div>
+        </div>
+
+        <nav
+          style={{
+            display: "grid",
+            gap: "12px",
+          }}
+        >
+          <button
+            type="button"
+            style={{
+              ...quietButtonStyle,
+              padding: "20px",
+              background: colors.text,
+              color: "#000",
+              borderColor: colors.text,
+              fontSize: "15px",
+            }}
+            onClick={() => navigate("/new-trade")}
+          >
+            NEW TRADE
+          </button>
+
+          <button
+            type="button"
+            style={{ ...quietButtonStyle, padding: "18px" }}
+            onClick={() => navigate("/history")}
+          >
+            HISTORY
+          </button>
+
+          <button
+            type="button"
+            style={{ ...quietButtonStyle, padding: "18px" }}
+            onClick={() => navigate("/statistics")}
+          >
+            STATISTICS
+          </button>
+        </nav>
+      </section>
+    </main>
+  );
+}
+
+function MiniMetric({ value, label }: { value: string; label: string }) {
   return (
     <div
       style={{
-        background: "#000",
-        minHeight: "100vh",
-        color: "#fff",
-        padding: "40px",
-        maxWidth: "900px",
-        margin: "0 auto",
+        background: colors.panelSoft,
+        border: `1px solid ${colors.border}`,
+        borderRadius: 14,
+        padding: "14px",
       }}
     >
-      <h1
-  style={{
-    fontSize: "72px",
-    lineHeight: 0.88,
-    marginBottom: "28px",
-    fontWeight: 900,
-    letterSpacing: "-3px",
-    textAlign: "center",
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  }}
->
-        <span>TRADING</span>
-<span>JOURNAL</span>
-      </h1>
-
       <div
-  style={{
-    marginBottom: "50px",
-    textAlign: "center",
-  }}
->
-        <div
-          style={{
-            fontSize: "88px",
-            fontWeight: 900,
-            lineHeight: 1,
-            color:
-              totalResult > 0
-                ? "#4ade80"
-                : totalResult < 0
-                ? "#ef4444"
-                : "#fff",
-          }}
-        >
-          {totalResult >= 0 ? "+" : ""}
-          {Number.isInteger(totalResult)
-            ? totalResult
-            : totalResult.toFixed(1)}
-          R
-        </div>
-
-        <div
-          style={{
-            marginTop: "10px",
-            opacity: 0.6,
-            fontSize: "18px",
-            letterSpacing: "1px",
-          }}
-        >
-          {totalTrades} {tradeLabel} • {winRate}% WR
-        </div>
+        style={{
+          fontSize: "24px",
+          fontWeight: 900,
+          lineHeight: 1,
+        }}
+      >
+        {value}
       </div>
-
-      <button
-  style={primaryCard}
-  onClick={() => navigate("/new-trade")}
->
-  NEW TRADE
-</button>
-
-      <button
-        style={navCard}
-        onClick={() => navigate("/history")}
+      <div
+        style={{
+          marginTop: "6px",
+          color: colors.muted,
+          fontSize: "11px",
+          fontWeight: 800,
+          letterSpacing: "0.08em",
+        }}
       >
-        HISTORY
-      </button>
-
-      <button
-        style={navCard}
-        onClick={() => navigate("/statistics")}
-      >
-        STATISTICS
-      </button>
-
+        {label}
+      </div>
     </div>
   );
 }
 
-const navCard = {
-  width: "100%",
-  background: "#111",
-  border: "1px solid #222",
-  color: "#fff",
-  padding: "24px",
-  borderRadius: "22px",
-  marginBottom: "14px",
-  fontSize: "20px",
-  fontWeight: 800,
-  cursor: "pointer",
-};
-const primaryCard = {
-  ...navCard,
-  background: "#151515",
-  border: "1px solid #333",
-  boxShadow: "0 0 25px rgba(74, 222, 128, 0.08)",
-};
+function formatResult(value: number) {
+  const text = Number.isInteger(value) ? String(value) : value.toFixed(1);
+  return `${value >= 0 ? "+" : ""}${text}R`;
+}
 
 export default Home;

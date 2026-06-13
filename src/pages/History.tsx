@@ -20,6 +20,19 @@ type HistoryTrade = Trade & {
   session?: string;
 };
 
+type TradeRow = {
+  id: string;
+  instrument: string;
+  direction: "LONG" | "SHORT";
+  result: number | string;
+  comment?: string | null;
+  before_image?: string | null;
+  after_image?: string | null;
+  trade_date?: string | null;
+  session?: string | null;
+  created_at: string;
+};
+
 type PreviewImage = {
   src: string;
   title: string;
@@ -27,8 +40,37 @@ type PreviewImage = {
 
 function History() {
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
-  useEffect(() => {
-  loadTrades();
+
+async function loadTrades() {
+  const { data, error } = await supabase
+    .from("trades")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const formattedTrades: HistoryTrade[] =
+    ((data || []) as TradeRow[]).map((trade) => ({
+      id: trade.id,
+      instrument: trade.instrument,
+      direction: trade.direction,
+      result: Number(trade.result),
+      comment: trade.comment || "",
+      beforeImage: trade.before_image || "",
+      afterImage: trade.after_image || "",
+      tradeDate: trade.trade_date || "",
+      session: trade.session || "",
+      createdAt: trade.created_at,
+    }));
+
+  setTrades(formattedTrades);
+}
+
+useEffect(() => {
+  void Promise.resolve().then(loadTrades);
 
   const channel = supabase
     .channel("trades-home")
@@ -49,34 +91,6 @@ function History() {
     supabase.removeChannel(channel);
   };
 }, []);
-
-const loadTrades = async () => {
-  const { data, error } = await supabase
-    .from("trades")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  const formattedTrades: HistoryTrade[] =
-    (data || []).map((trade: any) => ({
-      id: trade.id,
-      instrument: trade.instrument,
-      direction: trade.direction,
-      result: Number(trade.result),
-      comment: trade.comment || "",
-      beforeImage: trade.before_image || "",
-      afterImage: trade.after_image || "",
-      tradeDate: trade.trade_date || "",
-      session: trade.session || "",
-      createdAt: trade.created_at,
-    }));
-
-  setTrades(formattedTrades);
-};
 
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -241,15 +255,6 @@ const MONTHS = [
   ]);
 
   useEffect(() => {
-    if (
-      selectedTradeId &&
-      !filteredTrades.some((trade) => trade.id === selectedTradeId)
-    ) {
-      setSelectedTradeId(null);
-    }
-  }, [filteredTrades, selectedTradeId]);
-
-  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setSelectedTradeId(null);
@@ -329,7 +334,7 @@ const MONTHS = [
         minHeight: "100vh",
         color: "#fff",
         padding: "24px",
-        maxWidth: "1200px",
+        maxWidth: "860px",
         margin: "0 auto",
       }}
     ><button
@@ -345,15 +350,15 @@ const MONTHS = [
     fontWeight: 700,
   }}
 >
-  ← HOME
+  BACK
 </button>
       <h1
   style={{
-    fontSize: "72px",
+    fontSize: "44px",
     lineHeight: 0.88,
     marginBottom: "20px",
     fontWeight: 900,
-    letterSpacing: "-3px",
+    letterSpacing: 0,
     textAlign: "left",
     width: "100%",
     display: "flex",
@@ -544,7 +549,7 @@ const MONTHS = [
     marginBottom: "20px",
     fontSize: "18px",
     fontWeight: 600,
-    letterSpacing: "-0.5px",
+    letterSpacing: 0,
   }}
 >
   {filteredTrades.length} {countLabel}
@@ -662,7 +667,7 @@ const MONTHS = [
                         textAlign: "right",
                       }}
                     >
-                      ›
+                      {">"}
                     </div>
                   </button>
                 );
@@ -768,7 +773,6 @@ const MONTHS = [
     alignItems: "center",
   }}
 >
-  {/* DELETE ПЕРВЫЙ */}
   <button
     type="button"
     onClick={() => deleteTrade(selectedTrade.id)}
@@ -786,7 +790,6 @@ const MONTHS = [
     DELETE
   </button>
 
-  {/* КРЕСТИК ВТОРОЙ */}
   <button
     type="button"
     onClick={() => setSelectedTradeId(null)}
@@ -805,7 +808,7 @@ const MONTHS = [
       lineHeight: 1,
     }}
   >
-    ×
+    X
   </button>
 </div>
           </div>
@@ -883,7 +886,7 @@ gap: "16px",
     lineHeight: 1,
   }}
 >
-  ×
+  X
 </button>
 
             <img
