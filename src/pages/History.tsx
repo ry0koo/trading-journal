@@ -348,11 +348,19 @@ const MONTHS = [
   ← HOME
 </button>
       <h1
-        style={{
-          fontSize: "72px",
-          marginBottom: "30px",
-        }}
-      >
+  style={{
+    fontSize: "72px",
+    lineHeight: 0.88,
+    marginBottom: "28px",
+    fontWeight: 900,
+    letterSpacing: "-3px",
+    textAlign: "center",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  }}
+>
         HISTORY
       </h1>
 
@@ -562,13 +570,14 @@ const MONTHS = [
           }}
         >
           <div style={{ overflowX: "auto" }}>
-            <div style={{ minWidth: "760px" }}>
+            <div style={{ minWidth: "100%" }}>
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1.4fr 0.7fr 0.8fr 0.9fr 44px",
+                  gridTemplateColumns: "2fr 1fr 1fr 1fr 40px",
                   gap: "16px",
-                  padding: "18px 20px",
+                  whiteSpace: "nowrap",
+                  padding: "14px 16px",
                   color: "#8a8a8a",
                   fontSize: "14px",
                   letterSpacing: "0.04em",
@@ -594,10 +603,11 @@ const MONTHS = [
                     style={{
                       width: "100%",
                       display: "grid",
-                      gridTemplateColumns: "1.4fr 0.7fr 0.8fr 0.9fr 44px",
+                      whiteSpace: "nowrap",
+                      gridTemplateColumns: "2fr 1fr 1fr 1fr 40px",
                       gap: "16px",
                       alignItems: "center",
-                      padding: "18px 20px",
+                      padding: "14px 16px",
                       background: isSelected ? "#151515" : "#0f0f0f",
                       border: "none",
                       borderBottom: "1px solid #1f1f1f",
@@ -610,6 +620,9 @@ const MONTHS = [
                       style={{
                         fontSize: "18px",
                         fontWeight: 700,
+                        whiteSpace: "nowrap",
+overflow: "hidden",
+textOverflow: "ellipsis",
                         letterSpacing: "0.02em",
                       }}
                     >
@@ -629,6 +642,7 @@ const MONTHS = [
                       style={{
                         color: trade.result >= 0 ? "#4ade80" : "#ef4444",
                         fontWeight: 800,
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {formatResultR(trade.result)}
