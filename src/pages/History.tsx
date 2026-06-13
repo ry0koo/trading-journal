@@ -683,15 +683,11 @@ const MONTHS = [
           }}
         >
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              gap: "16px",
-              marginBottom: "20px",
-              flexWrap: "wrap",
-            }}
-          >
+  style={{
+    position: "relative",
+    marginBottom: "20px",
+  }}
+>
             <div>
               <div
                 style={{
@@ -733,21 +729,44 @@ const MONTHS = [
                 </span>
               </div>
 
-              {selectedTrade.comment && (
-                <div
-                  style={{
-                    marginTop: "14px",
-                    maxWidth: "700px",
-                    opacity: 0.92,
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {selectedTrade.comment}
-                </div>
-              )}
+             {selectedTrade.comment && (
+  <div style={{ marginTop: "14px", maxWidth: "700px" }}>
+    
+    <div
+      style={{
+        fontSize: "11px",
+        color: "#777",
+        textTransform: "uppercase",
+        letterSpacing: "0.08em",
+        marginBottom: "6px",
+      }}
+    >
+      COMMENT
+    </div>
+
+    <div
+      style={{
+        opacity: 0.92,
+        lineHeight: 1.6,
+        color: "#fff",
+      }}
+    >
+      {selectedTrade.comment}
+    </div>
+
+  </div>
+)}
             </div>
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div
+  style={{
+    position: "absolute",
+    top: 0,
+    right: 0,
+    display: "flex",
+    gap: "10px",
+  }}
+>
               <button
                 type="button"
                 onClick={() => setSelectedTradeId(null)}
@@ -783,7 +802,7 @@ const MONTHS = [
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gridTemplateColumns: "1fr 1fr",
               gap: "16px",
             }}
           >
@@ -1051,7 +1070,7 @@ function ImageBlock({
             alt=""
             style={{
               width: "100%",
-              height: "320px",
+              height: "220px",
               display: "block",
               borderRadius: "14px",
               objectFit: "cover",
@@ -1061,7 +1080,7 @@ function ImageBlock({
       ) : (
         <div
           style={{
-            minHeight: "320px",
+            minHeight: "220px",
             borderRadius: "14px",
             border: "1px dashed #2c2c2c",
             display: "flex",
