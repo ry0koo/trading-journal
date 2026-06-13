@@ -29,6 +29,25 @@ function History() {
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
   useEffect(() => {
   loadTrades();
+
+  const channel = supabase
+    .channel("trades-home")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "trades",
+      },
+      () => {
+        loadTrades();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }, []);
 
 const loadTrades = async () => {
