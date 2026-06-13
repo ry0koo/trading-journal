@@ -7,7 +7,6 @@ function Home() {
   const navigate = useNavigate();
 
   const [trades, setTrades] = useState<Trade[]>([]);
-  const [loading, setLoading] = useState(true);
 
 useEffect(() => {
   loadTrades();
@@ -33,18 +32,15 @@ useEffect(() => {
 }, []);
 
 const loadTrades = async () => {
-  setLoading(true);
-
   const { data, error } = await supabase
     .from("trades")
     .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
-  console.error(error);
-  setLoading(false);
-  return;
-}
+    console.error(error);
+    return;
+  }
 
   const formattedTrades: Trade[] =
     data?.map((trade) => ({
@@ -61,7 +57,6 @@ const loadTrades = async () => {
     })) || [];
 
   setTrades(formattedTrades);
-setLoading(false);
 };
 
   const totalTrades = trades.length;
@@ -112,50 +107,43 @@ setLoading(false);
 <span>JOURNAL</span>
       </h1>
 
-      {loading ? (
-  <div
-    style={{
-      fontSize: "24px",
-      opacity: 0.5,
-      padding: "40px 0",
-    }}
-  >
-    Loading...
-  </div>
-) : (
-  <>
-    <div
-      style={{
-        fontSize: "88px",
-        fontWeight: 900,
-        lineHeight: 1,
-        color:
-          totalResult > 0
-            ? "#4ade80"
-            : totalResult < 0
-            ? "#ef4444"
-            : "#fff",
-      }}
-    >
-      {totalResult >= 0 ? "+" : ""}
-      {Number.isInteger(totalResult)
-        ? totalResult
-        : totalResult.toFixed(1)}
-      R
-    </div>
+      <div
+  style={{
+    marginBottom: "50px",
+    textAlign: "center",
+  }}
+>
+        <div
+          style={{
+            fontSize: "88px",
+            fontWeight: 900,
+            lineHeight: 1,
+            color:
+              totalResult > 0
+                ? "#4ade80"
+                : totalResult < 0
+                ? "#ef4444"
+                : "#fff",
+          }}
+        >
+          {totalResult >= 0 ? "+" : ""}
+          {Number.isInteger(totalResult)
+            ? totalResult
+            : totalResult.toFixed(1)}
+          R
+        </div>
 
-    <div
-      style={{
-        marginTop: "10px",
-        opacity: 0.6,
-        fontSize: "18px",
-        letterSpacing: "1px",
-      }}
-    >
-      {totalTrades} {tradeLabel} • {winRate}% WR
-    </div>
-  </>
-)}
+        <div
+          style={{
+            marginTop: "10px",
+            opacity: 0.6,
+            fontSize: "18px",
+            letterSpacing: "1px",
+          }}
+        >
+          {totalTrades} {tradeLabel} • {winRate}% WR
+        </div>
+      </div>
 
       <button
   style={primaryCard}
