@@ -813,7 +813,7 @@ gap: "16px",
             }}
           >
             <ImageBlock
-              title="BEFORE SCREENSHOT"
+              title="BEFORE"
               image={selectedTrade.beforeImage}
               onClick={() =>
                 selectedTrade.beforeImage &&
@@ -825,7 +825,7 @@ gap: "16px",
             />
 
             <ImageBlock
-              title="AFTER SCREENSHOT"
+              title="AFTER"
               image={selectedTrade.afterImage}
               onClick={() =>
                 selectedTrade.afterImage &&
