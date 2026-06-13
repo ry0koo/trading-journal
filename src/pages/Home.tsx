@@ -56,6 +56,9 @@ const loadTrades = async () => {
       ? 0
       : Math.round((wins / totalTrades) * 100);
 
+      const tradeLabel =
+  totalTrades === 1 ? "TRADE" : "TRADES";
+
   return (
     <div
       style={{
@@ -119,16 +122,16 @@ const loadTrades = async () => {
             letterSpacing: "1px",
           }}
         >
-          {totalTrades} TRADES • {winRate}% WR
+          {totalTrades} {tradeLabel} • {winRate}% WR
         </div>
       </div>
 
       <button
-        style={navCard}
-        onClick={() => navigate("/new-trade")}
-      >
-        NEW TRADE
-      </button>
+  style={primaryCard}
+  onClick={() => navigate("/new-trade")}
+>
+  NEW TRADE
+</button>
 
       <button
         style={navCard}
@@ -159,6 +162,12 @@ const navCard = {
   fontSize: "20px",
   fontWeight: 800,
   cursor: "pointer",
+};
+const primaryCard = {
+  ...navCard,
+  background: "#151515",
+  border: "1px solid #333",
+  boxShadow: "0 0 25px rgba(74, 222, 128, 0.08)",
 };
 
 export default Home;
