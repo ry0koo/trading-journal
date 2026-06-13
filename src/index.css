@@ -46,6 +46,7 @@ body {
   margin: 0;
   background: #000;
   overflow-x: hidden;
+  font-family: "Sora", sans-serif;
 }
 
 * {

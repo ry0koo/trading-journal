@@ -56,8 +56,6 @@ const loadTrades = async () => {
       ? 0
       : Math.round((wins / totalTrades) * 100);
 
-  const recentTrades = [...trades].slice(0, 5);
-
   return (
     <div
       style={{
@@ -70,22 +68,26 @@ const loadTrades = async () => {
       }}
     >
       <h1
-        style={{
-          fontSize: "88px",
-          lineHeight: 0.9,
-          marginBottom: "40px",
-        }}
-      >
+  style={{
+    fontSize: "88px",
+    lineHeight: 0.88,
+    marginBottom: "50px",
+    fontWeight: 900,
+    letterSpacing: "-3px",
+    textTransform: "uppercase",
+  }}
+>
         TRADING
         <br />
         JOURNAL
       </h1>
 
       <div
-        style={{
-          marginBottom: "50px",
-        }}
-      >
+  style={{
+    marginBottom: "50px",
+    textAlign: "center",
+  }}
+>
         <div
           style={{
             fontSize: "96px",
@@ -139,88 +141,6 @@ const loadTrades = async () => {
         STATISTICS
       </button>
 
-      <div
-        style={{
-          marginTop: "50px",
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "34px",
-            marginBottom: "20px",
-          }}
-        >
-          RECENT TRADES
-        </h2>
-
-        {recentTrades.length === 0 ? (
-          <div
-            style={{
-              opacity: 0.5,
-            }}
-          >
-            No trades yet
-          </div>
-        ) : (
-          <div
-            style={{
-              background: "#111",
-              border: "1px solid #222",
-              borderRadius: "24px",
-              overflow: "hidden",
-            }}
-          >
-            {recentTrades.map((trade) => (
-              <div
-                key={trade.id}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "1fr 1fr 1fr",
-                  alignItems: "center",
-                  padding: "20px 24px",
-                  borderBottom:
-                    "1px solid #1d1d1d",
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: 800,
-                  }}
-                >
-                  {trade.instrument}
-                </div>
-
-                <div
-                  style={{
-                    textAlign: "center",
-                    color:
-                      trade.direction === "LONG"
-                        ? "#4ade80"
-                        : "#ef4444",
-                  }}
-                >
-                  {trade.direction}
-                </div>
-
-                <div
-                  style={{
-                    textAlign: "right",
-                    color:
-                      trade.result >= 0
-                        ? "#4ade80"
-                        : "#ef4444",
-                    fontWeight: 800,
-                  }}
-                >
-                  {trade.result >= 0 ? "+" : ""}
-                  {trade.result}R
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
