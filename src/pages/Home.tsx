@@ -76,11 +76,13 @@ const loadTrades = async () => {
     letterSpacing: "-3px",
     textAlign: "center",
     width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   }}
 >
-        TRADING
-        <br />
-        JOURNAL
+        <span>TRADING</span>
+<span>JOURNAL</span>
       </h1>
 
       <div
