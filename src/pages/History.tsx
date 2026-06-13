@@ -328,7 +328,7 @@ const MONTHS = [
         background: "#000",
         minHeight: "100vh",
         color: "#fff",
-        padding: "40px",
+        padding: "24px",
         maxWidth: "1200px",
         margin: "0 auto",
       }}
@@ -351,10 +351,10 @@ const MONTHS = [
   style={{
     fontSize: "72px",
     lineHeight: 0.88,
-    marginBottom: "28px",
+    marginBottom: "20px",
     fontWeight: 900,
     letterSpacing: "-3px",
-    textAlign: "center",
+    textAlign: "left",
     width: "100%",
     display: "flex",
     flexDirection: "column",
@@ -564,7 +564,7 @@ const MONTHS = [
         <div
           style={{
             border: "1px solid #222",
-            borderRadius: "24px",
+            borderRadius: "20px",
             overflow: "hidden",
             background: "#0b0b0b",
           }}
@@ -574,7 +574,7 @@ const MONTHS = [
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "2fr 1fr 1fr 1fr 40px",
+                  gridTemplateColumns: "1.8fr 0.9fr 0.9fr 1.1fr 20px",
                   gap: "16px",
                   whiteSpace: "nowrap",
                   padding: "14px 16px",
@@ -604,7 +604,7 @@ const MONTHS = [
                       width: "100%",
                       display: "grid",
                       whiteSpace: "nowrap",
-                      gridTemplateColumns: "2fr 1fr 1fr 1fr 40px",
+                      gridTemplateColumns: "1.8fr 0.9fr 0.9fr 1.1fr 20px",
                       gap: "16px",
                       alignItems: "center",
                       padding: "14px 16px",
@@ -618,13 +618,13 @@ const MONTHS = [
                   >
                     <div
                       style={{
-                        fontSize: "18px",
-                        fontWeight: 700,
-                        whiteSpace: "nowrap",
-overflow: "hidden",
-textOverflow: "ellipsis",
-                        letterSpacing: "0.02em",
-                      }}
+  fontSize: "18px",
+  fontWeight: 700,
+  minWidth: 0,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+}}
                     >
                       {trade.instrument}
                     </div>
@@ -675,7 +675,7 @@ textOverflow: "ellipsis",
             marginTop: "24px",
             background: "#111",
             border: "1px solid #222",
-            borderRadius: "24px",
+            borderRadius: "20px",
             padding: "24px",
           }}
         >
