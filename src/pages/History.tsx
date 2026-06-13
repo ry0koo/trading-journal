@@ -1,3 +1,4 @@
+import { supabase } from "../lib/supabase";
 import { useEffect, useMemo, useState } from "react";
 import {
   useSearchParams,
@@ -25,9 +26,38 @@ type PreviewImage = {
 };
 
 function History() {
-  const [trades, setTrades] = useState<HistoryTrade[]>(
-    JSON.parse(localStorage.getItem("trades") || "[]") as HistoryTrade[]
-  );
+  const [trades, setTrades] = useState<HistoryTrade[]>([]);
+  useEffect(() => {
+  loadTrades();
+}, []);
+
+const loadTrades = async () => {
+  const { data, error } = await supabase
+    .from("trades")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const formattedTrades: HistoryTrade[] =
+    (data || []).map((trade: any) => ({
+      id: trade.id,
+      instrument: trade.instrument,
+      direction: trade.direction,
+      result: Number(trade.result),
+      comment: trade.comment || "",
+      beforeImage: trade.before_image || "",
+      afterImage: trade.after_image || "",
+      tradeDate: trade.trade_date || "",
+      session: trade.session || "",
+      createdAt: trade.created_at,
+    }));
+
+  setTrades(formattedTrades);
+};
 
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -98,28 +128,20 @@ const MONTHS = [
   "NOVEMBER",
   "DECEMBER",
 ];
-  const deleteTrade = (id: string) => {
-    const updatedTrades = trades.filter((trade) => trade.id !== id);
+  const deleteTrade = async (id: string) => {
+  await supabase
+    .from("trades")
+    .delete()
+    .eq("id", id);
 
-    setTrades(updatedTrades);
-    localStorage.setItem("trades", JSON.stringify(updatedTrades));
+  setTrades(
+    trades.filter((trade) => trade.id !== id)
+  );
 
-    if (selectedTradeId === id) {
-      setSelectedTradeId(null);
-    }
-
-    if (previewImage?.src) {
-      const deletedTrade = trades.find((trade) => trade.id === id);
-      const deletedSources = new Set<string>();
-
-      if (deletedTrade?.beforeImage) deletedSources.add(deletedTrade.beforeImage);
-      if (deletedTrade?.afterImage) deletedSources.add(deletedTrade.afterImage);
-
-      if (deletedSources.has(previewImage.src)) {
-        setPreviewImage(null);
-      }
-    }
-  };
+  if (selectedTradeId === id) {
+    setSelectedTradeId(null);
+  }
+};
 
   const filteredTrades = useMemo(() => {
     let result = [...trades];
@@ -779,24 +801,24 @@ const MONTHS = [
             }}
           >
             <button
-              type="button"
-              onClick={() => setPreviewImage(null)}
-              style={{
-                position: "absolute",
-                top: "-44px",
-                right: 0,
-                background: "transparent",
-                color: "#fff",
-                border: "1px solid #444",
-                borderRadius: "999px",
-                width: "34px",
-                height: "34px",
-                cursor: "pointer",
-                lineHeight: 1,
-              }}
-            >
-              ×
-            </button>
+  type="button"
+  onClick={() => setPreviewImage(null)}
+  style={{
+    position: "absolute",
+    top: "-44px",
+    right: 0,
+    background: "transparent",
+    color: "#fff",
+    border: "1px solid #444",
+    borderRadius: "999px",
+    width: "34px",
+    height: "34px",
+    cursor: "pointer",
+    lineHeight: 1,
+  }}
+>
+  ×
+</button>
 
             <img
               src={previewImage.src}
@@ -815,7 +837,7 @@ const MONTHS = [
       )}
     </div>
   );
-}
+  }
 
 function getTradeDate(trade: HistoryTrade) {
   const source = trade.tradeDate || trade.createdAt;
