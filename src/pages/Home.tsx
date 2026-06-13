@@ -8,7 +8,6 @@ import {
   pageStyle,
   quietButtonStyle,
   resultColor,
-  sectionStyle,
 } from "../ui";
 
 function Home() {
@@ -75,30 +74,28 @@ function Home() {
     <main style={pageStyle}>
       <section
         style={{
-          minHeight: "calc(100vh - 48px)",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-between",
-          gap: "28px",
+          gap: "34px",
         }}
       >
         <div>
-          <div
+          <h1
             style={{
-              color: colors.muted,
-              fontSize: "12px",
-              fontWeight: 800,
-              letterSpacing: "0.08em",
-              marginBottom: "18px",
+              margin: "12px 0 36px",
+              fontSize: "62px",
+              lineHeight: 0.9,
+              fontWeight: 900,
+              letterSpacing: 0,
+              textAlign: "center",
             }}
           >
-            TRADING JOURNAL
-          </div>
+            <span style={{ display: "block" }}>TRADING</span>
+            <span style={{ display: "block" }}>JOURNAL</span>
+          </h1>
 
           <div
             style={{
-              ...sectionStyle,
-              padding: "28px 22px",
               textAlign: "center",
             }}
           >
@@ -108,7 +105,7 @@ function Home() {
                 fontSize: "12px",
                 fontWeight: 800,
                 letterSpacing: "0.08em",
-                marginBottom: "14px",
+                marginBottom: "12px",
               }}
             >
               TOTAL RESULT
@@ -127,10 +124,10 @@ function Home() {
 
             <div
               style={{
-                marginTop: "18px",
+                marginTop: "24px",
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
+                gap: "12px",
               }}
             >
               <MiniMetric value={String(totalTrades)} label={tradeLabel} />
@@ -143,6 +140,7 @@ function Home() {
           style={{
             display: "grid",
             gap: "12px",
+            marginTop: "18px",
           }}
         >
           <button
