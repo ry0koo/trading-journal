@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 import type { CSSProperties, ReactNode } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { supabase } from "../lib/supabase";
 import type { Trade } from "../types/trade";
@@ -57,7 +57,7 @@ type StatsTrade = Trade & {
 };
 
 function Statistics() {
-  const location = useLocation();
+  
   const navigate = useNavigate();
   const [trades, setTrades] = useState<StatsTrade[]>(() => {
   const cached = localStorage.getItem("stats_cache");
@@ -781,4 +781,5 @@ function EquityChart({
     </div>
   );
 }
+// temp fix
 export default Statistics;

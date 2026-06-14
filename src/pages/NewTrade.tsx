@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { popRoute } from "../navigationMemory";
 import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
-import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import {
@@ -24,7 +24,7 @@ import {
 type ScreenshotType = "before" | "after";
 
 function NewTrade() {
-  const location = useLocation();
+  
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -437,5 +437,5 @@ const previewStyle: CSSProperties = {
   width: "100%",
   display: "block",
 };
-
+// temp fix
 export default NewTrade;
