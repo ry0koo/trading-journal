@@ -266,6 +266,7 @@ function Statistics() {
   timestamp: safeDate.getTime(),
   dateLabel: label,
   equity: Number(sum.toFixed(2)),
+  xKey: `${safeDate.getTime()}-${sum}`,
 };
 })
     .filter(Boolean);
@@ -682,7 +683,10 @@ function EquityChart({
           />
 
           <XAxis
-  dataKey="dateLabel"
+  dataKey="id"
+  tickFormatter={(_, index) =>
+    data[index]?.dateLabel ?? ""
+  }
   tick={{ fill: "#666", fontSize: 12 }}
   minTickGap={40}
 />
@@ -699,11 +703,8 @@ function EquityChart({
 
     return [`${num.toFixed(2)} R`, "Equity"];
   }}
-  labelFormatter={(label) =>
-  new Date(Number(label)).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-  })
+  labelFormatter={(_, payload) =>
+  payload?.[0]?.payload?.dateLabel ?? ""
 }
   contentStyle={{
     background: "#111",
