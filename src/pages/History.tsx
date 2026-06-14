@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { colors } from "../ui";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import {
@@ -706,15 +707,7 @@ const MONTHS = [
         : selectedTrade.id
     );
   }}
-  style={{
-    background: "transparent",
-    color: "#888",
-    border: "1px solid #333",
-    borderRadius: "12px",
-    padding: "6px 10px",
-    cursor: "pointer",
-    fontSize: "16px",
-  }}
+  style={actionIconButtonStyle}
 >
   ⋯
 </button>
@@ -753,20 +746,7 @@ const MONTHS = [
   <button
     type="button"
     onClick={() => setSelectedTradeId(null)}
-    style={{
-      background: "#111",
-      color: "#fff",
-      border: "1px solid #333",
-      borderRadius: "12px",
-      width: "34px",
-      height: "34px",
-      cursor: "pointer",
-      fontSize: "18px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      lineHeight: 1,
-    }}
+    style={actionIconButtonStyle}
   >
     X
   </button>
@@ -1116,6 +1096,26 @@ const menuItemStyle: CSSProperties = {
   border: "1px solid #333",
   color: "#fff",
   textAlign: "left",
+  cursor: "pointer",
+};
+const actionIconButtonStyle: CSSProperties = {
+  width: "40px",
+  height: "40px",
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  background: colors.panel,
+  border: `1px solid ${colors.border}`,
+  borderRadius: "12px",
+
+  color: colors.text,
+
+  fontSize: "18px",
+  fontWeight: 900,
+  lineHeight: 1,
+
   cursor: "pointer",
 };
 
