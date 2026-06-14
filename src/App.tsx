@@ -6,7 +6,7 @@ import NewTrade from "./pages/NewTrade";
 import Statistics from "./pages/Statistics";
 import History from "./pages/History";
 
-function RouteTracker({ children }: { children: React.ReactNode }) {
+function RouteTracker({ children }: any) {
   const location = useLocation();
 
   useEffect(() => {
@@ -17,11 +17,7 @@ function RouteTracker({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const location = useLocation();
 
-useEffect(() => {
-  setLastRoute(location.pathname);
-}, [location.pathname]);
   return (
     <BrowserRouter>
   <RouteTracker>
