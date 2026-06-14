@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 import { supabase } from "../lib/supabase";
 import {
@@ -24,6 +26,10 @@ type ScreenshotType = "before" | "after";
 
 function NewTrade() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+const editId = searchParams.get("edit");
+const isEditMode = !!editId;
 
   const [instrument, setInstrument] = useState<"EURUSD" | "GBPUSD">("EURUSD");
   const [tradeDate, setTradeDate] = useState(getTodayInputValue());
@@ -33,6 +39,30 @@ function NewTrade() {
   const [comment, setComment] = useState("");
   const [beforeImage, setBeforeImage] = useState("");
   const [afterImage, setAfterImage] = useState("");
+  useEffect(() => {
+  if (!editId) return;
+
+  const loadTrade = async () => {
+    const { data, error } = await supabase
+      .from("trades")
+      .select("*")
+      .eq("id", editId)
+      .single();
+
+    if (error || !data) return;
+
+    setInstrument(data.instrument);
+    setDirection(data.direction);
+    setSession(data.session || "");
+    setTradeDate(data.trade_date || getTodayInputValue());
+    setResult(String(data.result));
+    setComment(data.comment || "");
+    setBeforeImage(data.before_image || "");
+    setAfterImage(data.after_image || "");
+  };
+
+  loadTrade();
+}, [editId]);
 
   const readFileToDataUrl = (file: File, type: ScreenshotType) => {
     const reader = new FileReader();
@@ -79,30 +109,49 @@ function NewTrade() {
   };
 
   const saveTrade = async () => {
-    if (!result.trim()) return;
+  if (!result.trim()) return;
 
-    const { error } = await supabase.from("trades").insert([
-      {
-        instrument,
-        direction,
-        result: Number(result.replace(",", ".")),
-        session,
-        trade_date: tradeDate,
-        comment,
-        before_image: beforeImage,
-        after_image: afterImage,
-        created_at: tradeDateToIso(tradeDate),
-      },
-    ]);
+  const payload = {
+    instrument,
+    direction,
+    result: Number(result.replace(",", ".")),
+    session,
+    trade_date: tradeDate,
+    comment,
+    before_image: beforeImage,
+    after_image: afterImage,
+  };
+
+  if (isEditMode) {
+    const { error } = await supabase
+      .from("trades")
+      .update(payload)
+      .eq("id", editId);
+
+    if (error) {
+      console.error(error);
+      alert("Error updating trade");
+      return;
+    }
+  } else {
+    const { error } = await supabase
+      .from("trades")
+      .insert([
+        {
+          ...payload,
+          created_at: tradeDateToIso(tradeDate),
+        },
+      ]);
 
     if (error) {
       console.error(error);
       alert("Error saving trade");
       return;
     }
+  }
 
-    navigate("/history");
-  };
+  navigate("/history");
+};
 
   const canSave = result.trim() !== "" && !Number.isNaN(Number(result.replace(",", ".")));
 
@@ -116,7 +165,9 @@ function NewTrade() {
         >
           BACK
         </button>
-        <h1 style={titleStyle}>NEW TRADE</h1>
+        <h1 style={titleStyle}>
+  {isEditMode ? "EDIT TRADE" : "NEW TRADE"}
+</h1>
       </header>
 
       <section style={{ ...sectionStyle, marginBottom: "14px" }}>
@@ -244,7 +295,7 @@ function NewTrade() {
           }}
           onClick={saveTrade}
         >
-          SAVE TRADE
+          {isEditMode ? "SAVE CHANGES" : "SAVE TRADE"}
         </button>
       </div>
     </main>
