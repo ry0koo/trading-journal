@@ -628,26 +628,83 @@ function EquityChart({
       <svg
   width="100%"
   height="100%"
-  viewBox="0 0 100 40"
+  viewBox="0 0 100 50"
   preserveAspectRatio="none"
 >
+
+  {/* GRID */}
+  {[0, 1, 2, 3, 4].map((i) => (
+    <line
+      key={i}
+      x1="0"
+      x2="100"
+      y1={(i * 50) / 4}
+      y2={(i * 50) / 4}
+      stroke="#1a1a1a"
+      strokeWidth="0.3"
+    />
+  ))}
+
+  {/* LINE */}
   <polyline
     fill="none"
     stroke="#4ade80"
-    strokeWidth="1.5"
+    strokeWidth="0.6"
     points={data
       .map((d, i) => {
-        const x = (i / (data.length - 1)) * 100;
-        const max = Math.max(...data.map(d => d.equity));
-        const min = Math.min(...data.map(d => d.equity));
-        const y =
-          40 - ((d.equity - min) / (max - min || 1)) * 40;
+        const x =
+          data.length === 1 ? 50 : (i / (data.length - 1)) * 100;
+
+        const max = Math.max(...data.map((d) => d.equity));
+        const min = Math.min(...data.map((d) => d.equity));
+
+        const y = 50 - ((d.equity - min) / (max - min || 1)) * 50;
 
         return `${x},${y}`;
       })
       .join(" ")}
   />
+
+  {/* DOTS + VALUES */}
+  {data.map((d, i) => {
+    const x =
+      data.length === 1 ? 50 : (i / (data.length - 1)) * 100;
+
+    const max = Math.max(...data.map((d) => d.equity));
+    const min = Math.min(...data.map((d) => d.equity));
+
+    const y = 50 - ((d.equity - min) / (max - min || 1)) * 50;
+
+    return (
+      <g key={i}>
+        <circle cx={x} cy={y} r="1.2" fill="#4ade80" />
+
+        <text
+          x={x}
+          y={y - 2}
+          fontSize="3"
+          fill="#ffffff"
+          textAnchor="middle"
+        >
+          {d.equity}
+        </text>
+      </g>
+    );
+  })}
 </svg>
+<div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    fontSize: "10px",
+    color: "#666",
+    marginTop: "6px",
+  }}
+>
+  {data.map((d) => (
+    <span key={d.trade}>{d.trade}</span>
+  ))}
+</div>
     </div>
   );
 }
