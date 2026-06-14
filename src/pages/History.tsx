@@ -87,16 +87,12 @@ async function loadTrades() {
       session: trade.session || "",
       createdAt: trade.created_at,
     }));
-  setAnimateList(false);
+    
   setTrades(formattedTrades);
 }
 
 useEffect(() => {
-  setAnimateList(false);
-
-setTimeout(() => {
   setAnimateList(true);
-}, 50);
   void Promise.resolve().then(loadTrades);
 
   const channel = supabase
