@@ -41,3 +41,6 @@ button {
   width: 100%;
   min-height: 100svh;
 }
+html {
+  scrollbar-gutter: stable;
+}
