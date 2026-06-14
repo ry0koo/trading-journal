@@ -55,6 +55,7 @@ function History() {
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
   const tradeDetailsRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<number>(0);
 
 async function loadTrades() {
   const { data, error } = await supabase
@@ -534,6 +535,8 @@ const MONTHS = [
                     key={trade.id}
                     type="button"
                     onClick={() => {
+  listRef.current = window.scrollY;
+
   setSelectedTradeId(trade.id);
 
   setTimeout(() => {
@@ -760,10 +763,12 @@ const MONTHS = [
     onClick={() => {
   setSelectedTradeId(null);
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
+  setTimeout(() => {
+    window.scrollTo({
+      top: listRef.current,
+      behavior: "smooth",
+    });
+  }, 50);
 }}
     style={actionIconButtonStyle}
   >
