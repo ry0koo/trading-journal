@@ -270,6 +270,8 @@ function Statistics() {
 })
     .filter(Boolean);
 }, [filteredTrades]);
+console.log("EQUITY DATA");
+console.table(equityCurveData);
   const winRate =
     totalTrades === 0 ? 0 : Math.round((wins.length / totalTrades) * 100);
 
@@ -680,16 +682,9 @@ function EquityChart({
           />
 
           <XAxis
-  dataKey="timestamp"
-  type="number"
-  domain={["dataMin", "dataMax"]}
-  tickFormatter={(value) =>
-    new Date(value).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-    })
-  }
+  dataKey="dateLabel"
   tick={{ fill: "#666", fontSize: 12 }}
+  minTickGap={40}
 />
 
           <YAxis
