@@ -251,23 +251,22 @@ function Statistics() {
     .map((t) => {
   const date = getTradeDate(t);
 
-  if (isNaN(date.getTime())) {
-    return {
-      trade: new Date(0),
-      equity: sum,
-    };
-  }
+  const safeDate = new Date(date);
+
+  const label = Number.isNaN(safeDate.getTime())
+    ? "Invalid"
+    : safeDate.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+      });
 
   sum += Number(t.result ?? 0);
 
   return {
-  trade: date,
-  dateLabel: date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-  }),
-  equity: Number(sum.toFixed(2)),
-};
+    trade: safeDate,
+    dateLabel: label, // 🔥 ВАЖНО — ВСЕГДА STRING
+    equity: Number(sum.toFixed(2)),
+  };
 })
     .filter(Boolean);
 }, [filteredTrades]);
@@ -469,9 +468,14 @@ function Statistics() {
     EQUITY CURVE
   </div>
 
-  <div style={{ width: "100%", height: "360px" }}>
-    <EquityChart data={equityCurveData} />
-  </div>
+  <div
+  style={{
+    width: "100%",
+    height: "520px",
+  }}
+>
+  <EquityChart data={equityCurveData} />
+</div>
 </section>
 
       <section style={statsGridStyle}>
@@ -631,28 +635,32 @@ const statsGridStyle: CSSProperties = {
 function EquityChart({
   data,
 }: {
-  data: { trade: Date; equity: number }[];
-}){
+  data: {
+    trade: Date;
+    dateLabel: string;
+    equity: number;
+  }[];
+}) {
 
   return (
     <div
-      style={{
-        width: "100%",
-        height: "100%",
-        borderRadius: "18px",
-        background: "#0a0a0a",
-        border: "1px solid #1a1a1a",
-        padding: "0px",
-      }}
-    >
+  style={{
+    width: "100%",
+    height: "100%",
+    borderRadius: "18px",
+    background: "#0a0a0a",
+    border: "1px solid #1a1a1a",
+    overflow: "hidden",
+  }}
+>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
   data={data}
   margin={{
-  top: 10,
-  right: 0,
-  left: 0,
-  bottom: 0,
+  top: 5,
+  right: -20,
+  left: -30,
+  bottom: 20,
 }}
 >
           <defs>
@@ -670,9 +678,7 @@ function EquityChart({
           <XAxis
   dataKey="dateLabel"
   tick={{ fill: "#666", fontSize: 12 }}
-  interval={0}
-  angle={-30}
-  textAnchor="end"
+  minTickGap={40}
 />
 
           <YAxis
