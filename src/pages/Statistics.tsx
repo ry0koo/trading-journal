@@ -472,6 +472,8 @@ function Statistics() {
   style={{
     width: "100%",
     height: "520px",
+    overflow: "hidden",
+    borderRadius: "18px",
   }}
 >
   <EquityChart data={equityCurveData} />
@@ -651,15 +653,16 @@ function EquityChart({
     background: "#0a0a0a",
     border: "1px solid #1a1a1a",
     overflow: "hidden",
+    display: "flex",
   }}
 >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
   data={data}
   margin={{
-  top: 5,
-  right: -20,
-  left: -30,
+  top: 10,
+  right: 10,
+  left: 10,
   bottom: 20,
 }}
 >
