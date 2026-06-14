@@ -132,6 +132,14 @@ function Statistics() {
     return [...new Set(quarters)].sort((a, b) => a - b);
   }, [trades, selectedYear]);
 
+  useEffect(() => {
+  if (availableQuarters.length === 0) return;
+
+  if (!availableQuarters.includes(selectedQuarter)) {
+    setSelectedQuarter(availableQuarters[0]);
+  }
+}, [availableQuarters]);
+
   const availableWeeks = useMemo(() => {
     const weekMap = new Map<string, TradingWeek>();
 
@@ -418,18 +426,13 @@ function Statistics() {
 
 function getTradeDate(trade: StatsTrade) {
   const source = trade.tradeDate || trade.createdAt;
+  const date = new Date(source);
 
-  if (!source) {
-    return new Date();
+  if (Number.isNaN(date.getTime())) {
+    return new Date(trade.createdAt);
   }
 
-  // ⚠️ КЛЮЧЕВОЙ ФИКС: ручной парсинг даты YYYY-MM-DD
-  if (typeof source === "string" && source.includes("-")) {
-    const [y, m, d] = source.split("-").map(Number);
-    return new Date(y, m - 1, d);
-  }
-
-  return new Date(source);
+  return date;
 }
 
 function formatResultR(value: number) {
