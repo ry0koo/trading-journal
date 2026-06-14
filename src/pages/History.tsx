@@ -612,11 +612,13 @@ transition:
   textAlign: "left",
   cursor: "pointer",
 
-  /* ✨ НОВАЯ АНИМАЦИЯ */
-  opacity: 0,
-  transform: "translateY(10px)",
-  animation: `fadeInUp 0.35s ease forwards`,
-  animationDelay: `${index * 40}ms`,
+  opacity: animateIn ? 1 : 0,
+
+transform: animateIn
+  ? "translateY(0)"
+  : "translateY(8px)",
+
+transition: `all 0.35s ease ${index * 40}ms`,
 }}
                   >
                     <div
