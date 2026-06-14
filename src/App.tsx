@@ -10,18 +10,20 @@ function App() {
   const location = useLocation();
 
   return (
-    <TransitionGroup>
+    <TransitionGroup component={null}>
       <CSSTransition
         key={location.pathname}
         classNames="page"
         timeout={250}
       >
-        <Routes location={location}>
-          <Route path="/" element={<Home />} />
-          <Route path="/new-trade" element={<NewTrade />} />
-          <Route path="/statistics" element={<Statistics />} />
-          <Route path="/history" element={<History />} />
-        </Routes>
+        <div style={{ height: "100%" }}>
+          <Routes location={location}>
+            <Route path="/" element={<Home />} />
+            <Route path="/new-trade" element={<NewTrade />} />
+            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/history" element={<History />} />
+          </Routes>
+        </div>
       </CSSTransition>
     </TransitionGroup>
   );

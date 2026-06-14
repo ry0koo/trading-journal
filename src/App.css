@@ -195,11 +195,9 @@
 
 .page-exit {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .page-exit-active {
   opacity: 0;
-  transform: translateY(-10px);
   transition: all 200ms ease;
 }
