@@ -261,9 +261,13 @@ function Statistics() {
   sum += Number(t.result ?? 0);
 
   return {
-    trade: date,
-    equity: Number(sum.toFixed(2)),
-  };
+  trade: date,
+  dateLabel: date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+  }),
+  equity: Number(sum.toFixed(2)),
+};
 })
     .filter(Boolean);
 }, [filteredTrades]);
@@ -664,7 +668,7 @@ function EquityChart({
           />
 
           <XAxis
-  dataKey="trade"
+  dataKey="dateLabel"
   tick={{ fill: "#666", fontSize: 12 }}
   interval={0}
   angle={-30}
