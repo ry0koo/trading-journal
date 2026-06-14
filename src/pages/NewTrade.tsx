@@ -25,12 +25,6 @@ type ScreenshotType = "before" | "after";
 
 function NewTrade() {
   
-  const [animateIn, setAnimateIn] = useState(false);
-
-useEffect(() => {
-  const timer = setTimeout(() => setAnimateIn(true), 10);
-  return () => clearTimeout(timer);
-}, []);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -443,6 +437,5 @@ const previewStyle: CSSProperties = {
   width: "100%",
   display: "block",
 };
-// temp fix
 // temp fix
 export default NewTrade;
