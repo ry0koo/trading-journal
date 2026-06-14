@@ -281,6 +281,30 @@ console.table(equityCurveData);
   const winRate =
     totalTrades === 0 ? 0 : Math.round((wins.length / totalTrades) * 100);
 
+    const sessionStats = useMemo(() => {
+  const map: Record<string, { wins: number; losses: number; total: number }> = {};
+
+  filteredTrades.forEach((t) => {
+    if (!t.session) return;
+
+    if (!map[t.session]) {
+      map[t.session] = { wins: 0, losses: 0, total: 0 };
+    }
+
+    map[t.session].total += 1;
+
+    if (t.result > 0) map[t.session].wins += 1;
+    else if (t.result < 0) map[t.session].losses += 1;
+  });
+
+  return Object.entries(map).map(([session, v]) => ({
+    session,
+    wins: v.wins,
+    losses: v.losses,
+    total: v.total,
+    winrate: v.total ? (v.wins / v.total) * 100 : 0,
+  }));
+}, [filteredTrades]);
   const openHistory = (type: HistoryType) => {
     const params = new URLSearchParams();
 
@@ -528,6 +552,69 @@ transition:
           color={colors.red}
           onClick={() => openHistory("losses")}
         />
+        <section style={{ ...sectionStyle, marginTop: "14px" }}>
+  <div
+    style={{
+      color: colors.muted,
+      fontSize: "12px",
+      fontWeight: 800,
+      letterSpacing: "0.08em",
+      marginBottom: "14px",
+    }}
+  >
+    SESSION WIN RATE
+  </div>
+
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+      gap: "12px",
+    }}
+  >
+    {sessionStats.map((s) => (
+      <div
+        key={s.session}
+        style={{
+          background: colors.panel,
+          border: `1px solid ${colors.border}`,
+          borderRadius: "16px",
+          padding: "14px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+        }}
+      >
+        <div style={{ fontWeight: 900, fontSize: "16px" }}>
+          {s.session}
+        </div>
+
+        <div style={{ fontSize: "12px", color: colors.muted }}>
+          {s.total} trades
+        </div>
+
+        <div
+          style={{
+            fontSize: "22px",
+            fontWeight: 900,
+            color:
+              s.winrate > 55
+                ? colors.green
+                : s.winrate >= 45
+                ? "#facc15"
+                : colors.red,
+          }}
+        >
+          {s.winrate.toFixed(1)}%
+        </div>
+
+        <div style={{ fontSize: "12px", color: colors.muted }}>
+          W: {s.wins} / L: {s.losses}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
       </section>
       {isChartOpen && (
   <div
