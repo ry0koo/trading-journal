@@ -66,6 +66,7 @@ function Statistics() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedQuarter, setSelectedQuarter] = useState(1);
   const [selectedWeek, setSelectedWeek] = useState(0);
+  const [isChartOpen, setIsChartOpen] = useState(false);
 
   const loadTrades = async () => {
   const { data, error } = await supabase
@@ -472,11 +473,13 @@ console.table(equityCurveData);
   </div>
 
   <div
+  onClick={() => setIsChartOpen(true)}
   style={{
     width: "100%",
     height: "520px",
     overflow: "hidden",
     borderRadius: "18px",
+    cursor: "zoom-in",
   }}
 >
   <EquityChart data={equityCurveData} />
@@ -503,6 +506,32 @@ console.table(equityCurveData);
           onClick={() => openHistory("losses")}
         />
       </section>
+      {isChartOpen && (
+  <div
+    onClick={() => setIsChartOpen(false)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.9)",
+      zIndex: 9999,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        width: "95vw",
+        height: "85vh",
+        maxWidth: "1600px",
+      }}
+    >
+      <EquityChart data={equityCurveData} />
+    </div>
+  </div>
+)}
     </main>
   );
 }
