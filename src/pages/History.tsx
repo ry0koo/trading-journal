@@ -1,10 +1,21 @@
 import { supabase } from "../lib/supabase";
 import { useEffect, useMemo, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   useSearchParams,
   useNavigate,
 } from "react-router-dom";
 import type { Trade } from "../types/trade";
+import {
+  activeSegmentStyle,
+  headerStyle,
+  quietButtonStyle,
+  sectionStyle,
+  segmentStyle,
+  selectStyle,
+  titleStyle,
+  widePageStyle,
+} from "../ui";
 
 type Period = "week" | "month" | "quarter" | "year" | "all";
 type TradeType = "trades" | "wins" | "losses";
@@ -328,55 +339,21 @@ const MONTHS = [
       : "TRADES";
 
   return (
-    <div
-      style={{
-        background: "#000",
-        minHeight: "100vh",
-        color: "#fff",
-        padding: "24px",
-        maxWidth: "860px",
-        margin: "0 auto",
-      }}
-    ><button
-  onClick={() => navigate("/")}
-  style={{
-    background: "#111",
-    border: "1px solid #222",
-    color: "#fff",
-    padding: "12px 18px",
-    borderRadius: "14px",
-    cursor: "pointer",
-    marginBottom: "24px",
-    fontWeight: 700,
-  }}
->
-  BACK
-</button>
-      <h1
-  style={{
-    fontSize: "44px",
-    lineHeight: 0.88,
-    marginBottom: "20px",
-    fontWeight: 900,
-    letterSpacing: 0,
-    textAlign: "left",
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-  }}
->
-        HISTORY
-      </h1>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          flexWrap: "wrap",
-          marginBottom: "20px",
-        }}
+  <main style={widePageStyle}>
+    <header style={headerStyle}>
+      <button
+        type="button"
+        onClick={() => navigate("/")}
+        style={quietButtonStyle}
       >
+        BACK
+      </button>
+
+      <h1 style={titleStyle}>HISTORY</h1>
+    </header>
+
+    <section style={{ ...sectionStyle, marginBottom: "14px" }}>
+      <div style={periodGridStyle}>
         <PeriodButton
           active={activeMode === "week"}
           onClick={() => handleModeClick("week")}
@@ -409,151 +386,96 @@ const MONTHS = [
           active={activeMode === "all"}
           onClick={() => handleModeClick("all")}
         >
-          ALL TIME
+          ALL
         </PeriodButton>
       </div>
-{activeMode !== "all" && (
-  <div
-    style={{
-      display: "flex",
-      gap: "10px",
-      marginBottom: "25px",
-      flexWrap: "wrap",
-    }}
-  >
-    <select
-      value={activeYear}
-      onChange={(e) => {
-        const params = new URLSearchParams(
-          searchParams
-        );
 
-        params.set(
-          "year",
-          e.target.value
-        );
+      {activeMode !== "all" && (
+        <div style={filterGridStyle}>
+          <select
+            value={activeYear}
+            onChange={(e) => {
+              const params = new URLSearchParams(searchParams);
+              params.set("year", e.target.value);
+              setSearchParams(params);
+            }}
+            style={selectStyle}
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
 
-        setSearchParams(params);
+          {activeMode === "month" && (
+            <select
+              value={activeMonth}
+              onChange={(e) => {
+                const params = new URLSearchParams(searchParams);
+                params.set("month", e.target.value);
+                setSearchParams(params);
+              }}
+              style={selectStyle}
+            >
+              {availableMonths.map((month) => (
+                <option key={month} value={month}>
+                  {MONTHS[month]}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {activeMode === "quarter" && (
+            <select
+              value={activeQuarter}
+              onChange={(e) => {
+                const params = new URLSearchParams(searchParams);
+                params.set("quarter", e.target.value);
+                setSearchParams(params);
+              }}
+              style={selectStyle}
+            >
+              {availableQuarters.map((quarter) => (
+                <option key={quarter} value={quarter}>
+                  Q{quarter}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {activeMode === "week" && (
+            <select
+              value={activeWeekStart ?? ""}
+              onChange={(e) => {
+                const params = new URLSearchParams(searchParams);
+                params.set("weekStart", e.target.value);
+                setSearchParams(params);
+              }}
+              style={selectStyle}
+            >
+              {weeksForActiveYear.map((week) => (
+                <option key={week.key} value={week.key}>
+                  {formatWeekLabel(week)}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
+    </section>
+
+    <div
+      style={{
+        opacity: 0.6,
+        marginBottom: "20px",
+        fontSize: "18px",
+        fontWeight: 600,
+        letterSpacing: 0,
       }}
-      style={selectStyle}
     >
-      {years.map((year) => (
-        <option
-          key={year}
-          value={year}
-        >
-          {year}
-        </option>
-      ))}
-    </select>
-
-    {activeMode === "month" && (
-      <select
-        value={activeMonth}
-        onChange={(e) => {
-          const params =
-            new URLSearchParams(
-              searchParams
-            );
-
-          params.set(
-            "month",
-            e.target.value
-          );
-
-          setSearchParams(params);
-        }}
-        style={selectStyle}
-      >
-        {availableMonths.map(
-          (month) => (
-            <option
-              key={month}
-              value={month}
-            >
-              {MONTHS[month]}
-            </option>
-          )
-        )}
-      </select>
-    )}
-
-    {activeMode === "quarter" && (
-      <select
-        value={activeQuarter}
-        onChange={(e) => {
-          const params =
-            new URLSearchParams(
-              searchParams
-            );
-
-          params.set(
-            "quarter",
-            e.target.value
-          );
-
-          setSearchParams(params);
-        }}
-        style={selectStyle}
-      >
-        {availableQuarters.map(
-          (quarter) => (
-            <option
-              key={quarter}
-              value={quarter}
-            >
-              Q{quarter}
-            </option>
-          )
-        )}
-      </select>
-    )}
-
-    {activeMode === "week" && (
-      <select
-        value={activeWeekStart ?? ""}
-        onChange={(e) => {
-          const params =
-            new URLSearchParams(
-              searchParams
-            );
-
-          params.set(
-            "weekStart",
-            e.target.value
-          );
-
-          setSearchParams(params);
-        }}
-        style={selectStyle}
-      >
-        {weeksForActiveYear.map(
-          (week) => (
-            <option
-              key={week.key}
-              value={week.key}
-            >
-              {formatWeekLabel(
-                week
-              )}
-            </option>
-          )
-        )}
-      </select>
-    )}
-  </div>
-)}
-      <div
-  style={{
-    opacity: 0.6,
-    marginBottom: "20px",
-    fontSize: "18px",
-    fontWeight: 600,
-    letterSpacing: 0,
-  }}
->
-  {filteredTrades.length} {countLabel}
-</div>
+      {filteredTrades.length} {countLabel}
+    </div>
 
       {filteredTrades.length === 0 && (
         <div
@@ -904,7 +826,7 @@ gap: "16px",
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
   }
 
@@ -1017,21 +939,13 @@ function PeriodButton({
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <button
       onClick={onClick}
       type="button"
-      style={{
-        padding: "14px 22px",
-        background: active ? "#fff" : "#111",
-        color: active ? "#000" : "#fff",
-        border: "1px solid #222",
-        borderRadius: "14px",
-        fontWeight: 700,
-        cursor: "pointer",
-      }}
+      style={active ? activeSegmentStyle : segmentStyle}
     >
       {children}
     </button>
@@ -1145,12 +1059,16 @@ function formatWeekLabel(
   return `${start.toUpperCase()} - ${end.toUpperCase()}`;
 }
 
-const selectStyle = {
-  background: "#111",
-  color: "#fff",
-  border: "1px solid #222",
-  borderRadius: "14px",
-  padding: "14px",
-  fontSize: "15px",
+const periodGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+  gap: "8px",
+};
+
+const filterGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+  gap: "10px",
+  marginTop: "14px",
 };
 export default History;
