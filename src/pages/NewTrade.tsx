@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { getLastRoute } from "../navigationMemory";
 import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import {
@@ -24,6 +24,7 @@ import {
 type ScreenshotType = "before" | "after";
 
 function NewTrade() {
+  const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -163,8 +164,10 @@ const isEditMode = !!editId;
         <button
           type="button"
           onClick={() => {
-  if (window.history.length > 1) {
-    navigate(-1);
+  const prev = getLastRoute();
+
+  if (prev && prev !== location.pathname) {
+    navigate(prev);
   } else {
     navigate("/");
   }

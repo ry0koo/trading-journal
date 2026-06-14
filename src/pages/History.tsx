@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { colors } from "../ui";
+import { getLastRoute } from "../navigationMemory";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useRef } from "react";
@@ -350,8 +351,10 @@ const MONTHS = [
       <button
         type="button"
         onClick={() => {
-  if (window.history.length > 1) {
-    navigate(-1);
+  const prev = getLastRoute();
+
+  if (prev && prev !== location.pathname) {
+    navigate(prev);
   } else {
     navigate("/");
   }

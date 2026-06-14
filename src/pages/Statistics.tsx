@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { getLastRoute } from "../navigationMemory";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -9,7 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 import type { CSSProperties, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { supabase } from "../lib/supabase";
 import type { Trade } from "../types/trade";
@@ -56,6 +57,7 @@ type StatsTrade = Trade & {
 };
 
 function Statistics() {
+  const location = useLocation();
   const navigate = useNavigate();
   const [trades, setTrades] = useState<StatsTrade[]>(() => {
   const cached = localStorage.getItem("stats_cache");
@@ -325,8 +327,10 @@ console.table(equityCurveData);
         <button
           type="button"
           onClick={() => {
-  if (window.history.length > 1) {
-    navigate(-1);
+  const prev = getLastRoute();
+
+  if (prev && prev !== location.pathname) {
+    navigate(prev);
   } else {
     navigate("/");
   }
