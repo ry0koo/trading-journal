@@ -51,6 +51,7 @@ type PreviewImage = {
 
 function History() {
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
+  const [showMenuId, setShowMenuId] = useState<string | null>(null);
 
 async function loadTrades() {
   const { data, error } = await supabase
@@ -542,7 +543,7 @@ const MONTHS = [
                       border: "none",
                       borderBottom: "1px solid #1f1f1f",
                       color: "#fff",
-                      textAlign: "left",
+                      textAlign: "left" as CSSProperties["textAlign"],
                       cursor: "pointer",
                     }}
                   >
@@ -696,21 +697,58 @@ const MONTHS = [
   }}
 >
   <button
-    type="button"
-    onClick={() => deleteTrade(selectedTrade.id)}
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation();
+    setShowMenuId(
+      showMenuId === selectedTrade.id
+        ? null
+        : selectedTrade.id
+    );
+  }}
+  style={{
+    background: "transparent",
+    color: "#888",
+    border: "1px solid #333",
+    borderRadius: "12px",
+    padding: "6px 10px",
+    cursor: "pointer",
+    fontSize: "16px",
+  }}
+>
+  ⋯
+</button>
+{showMenuId === selectedTrade.id && (
+  <div
     style={{
-      background: "transparent",
-      color: "#888",
+      position: "absolute",
+      top: "40px",
+      right: "0px",
+      background: "#111",
       border: "1px solid #333",
       borderRadius: "12px",
-      padding: "10px 14px",
-      cursor: "pointer",
-      fontSize: "12px",
-      height: "34px",
+      overflow: "hidden",
+      zIndex: 50,
+      minWidth: "120px",
     }}
   >
-    DELETE
-  </button>
+    <button
+      style={menuItemStyle}
+      onClick={() => {
+        navigate(`/new-trade?edit=${selectedTrade.id}`);
+      }}
+    >
+      EDIT
+    </button>
+
+    <button
+      style={menuItemStyle}
+      onClick={() => deleteTrade(selectedTrade.id)}
+    >
+      DELETE
+    </button>
+  </div>
+)}
 
   <button
     type="button"
@@ -1071,4 +1109,14 @@ const filterGridStyle: CSSProperties = {
   gap: "10px",
   marginTop: "14px",
 };
+const menuItemStyle: CSSProperties = {
+  width: "100%",
+  padding: "10px 12px",
+  background: "#111",
+  border: "1px solid #333",
+  color: "#fff",
+  textAlign: "left",
+  cursor: "pointer",
+};
+
 export default History;
