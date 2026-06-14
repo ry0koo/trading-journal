@@ -247,19 +247,25 @@ function Statistics() {
 
   return filteredTrades
     .slice()
-    .sort(
-      (a, b) =>
-        getTradeDate(a).getTime() - getTradeDate(b).getTime()
-    )
-    .map((t, index) => {
-      sum += t.result;
+    .sort((a, b) => getTradeDate(a).getTime() - getTradeDate(b).getTime())
+    .map((t) => {
+  const date = getTradeDate(t);
 
-      return {
-        trade: index + 1, // ВАЖНО: оставляем число
-        equity: Number(sum.toFixed(2)),
-        date: getTradeDate(t), // добавим отдельно дату
-      };
-    });
+  if (isNaN(date.getTime())) {
+    return {
+      trade: new Date(0),
+      equity: sum,
+    };
+  }
+
+  sum += Number(t.result);
+
+  return {
+    trade: date,
+    equity: Number(sum.toFixed(2)),
+  };
+})
+    .filter(Boolean);
 }, [filteredTrades]);
   const winRate =
     totalTrades === 0 ? 0 : Math.round((wins.length / totalTrades) * 100);
@@ -459,7 +465,7 @@ function Statistics() {
     EQUITY CURVE
   </div>
 
-  <div style={{ width: "100%", height: "320px" }}>
+  <div style={{ width: "100%", height: "100%", minHeight: "320px" }}>
     <EquityChart data={equityCurveData} />
   </div>
 </section>
@@ -621,8 +627,9 @@ const statsGridStyle: CSSProperties = {
 function EquityChart({
   data,
 }: {
-  data: { trade: number; equity: number }[];
-}) {
+  data: { trade: Date; equity: number }[];
+}){
+  const formatDate = (value: string) => value;
   return (
     <div
       style={{
@@ -631,18 +638,18 @@ function EquityChart({
         borderRadius: "18px",
         background: "#0a0a0a",
         border: "1px solid #1a1a1a",
-        padding: "12px",
+        padding: "0px",
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
   data={data}
   margin={{
-    top: 10,
-    right: 10,
-    left: -20,
-    bottom: 10,
-  }}
+  top: 10,
+  right: 0,
+  left: 0,
+  bottom: 0,
+}}
 >
           <defs>
             <linearGradient id="equityFill" x1="0" y1="0" x2="0" y2="1">
@@ -657,15 +664,17 @@ function EquityChart({
           />
 
           <XAxis
-            dataKey="trade"
-            stroke="#666"
-            tick={{ fill: "#666", fontSize: 12 }}
-          />
+  dataKey="trade"
+  tick={{ fill: "#666", fontSize: 12 }}
+  interval={0}
+  angle={-30}
+  textAnchor="end"
+/>
 
           <YAxis
   stroke="#666"
   tick={{ fill: "#666", fontSize: 12 }}
-  domain={[(dataMin) => dataMin - 1, (dataMax) => dataMax + 1]}
+  domain={["auto", "auto"]}
 />
 
           <Tooltip
