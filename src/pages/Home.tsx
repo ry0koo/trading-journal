@@ -12,7 +12,10 @@ import {
 
 function Home() {
   const navigate = useNavigate();
-  const [trades, setTrades] = useState<Trade[]>([]);
+  const [trades, setTrades] = useState<Trade[]>(() => {
+  const cached = localStorage.getItem("trades_cache");
+  return cached ? JSON.parse(cached) : [];
+});
 
   const loadTrades = async () => {
     const { data, error } = await supabase
@@ -38,6 +41,7 @@ function Home() {
       })) || [];
 
     setTrades(formattedTrades);
+localStorage.setItem("trades_cache", JSON.stringify(formattedTrades));
   };
 
   useEffect(() => {
