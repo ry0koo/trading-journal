@@ -625,15 +625,29 @@ function EquityChart({
         padding: "12px",
       }}
     >
-      <pre
-        style={{
-          color: "#fff",
-          fontSize: "12px",
-          opacity: 0.7,
-        }}
-      >
-        {JSON.stringify(data, null, 2)}
-      </pre>
+      <svg
+  width="100%"
+  height="100%"
+  viewBox="0 0 100 40"
+  preserveAspectRatio="none"
+>
+  <polyline
+    fill="none"
+    stroke="#4ade80"
+    strokeWidth="1.5"
+    points={data
+      .map((d, i) => {
+        const x = (i / (data.length - 1)) * 100;
+        const max = Math.max(...data.map(d => d.equity));
+        const min = Math.min(...data.map(d => d.equity));
+        const y =
+          40 - ((d.equity - min) / (max - min || 1)) * 40;
+
+        return `${x},${y}`;
+      })
+      .join(" ")}
+  />
+</svg>
     </div>
   );
 }
