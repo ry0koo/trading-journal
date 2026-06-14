@@ -178,12 +178,15 @@ function NewTrade() {
 
         <label style={labelStyle}>Result (R)</label>
         <input
-          type="number"
+          type="text"
           inputMode="decimal"
           step="0.1"
           placeholder="0.0"
           value={result}
-          onChange={(e) => setResult(e.target.value)}
+          onChange={(e) => {
+  const value = e.target.value.replace(",", ".");
+  setResult(value);
+}}
           style={{
             ...inputStyle,
             marginBottom: 0,
