@@ -251,7 +251,7 @@ function Statistics() {
     .map((t) => {
   const date = getTradeDate(t);
 
-  const safeDate = new Date(date);
+  const safeDate = date;
 
   const label = Number.isNaN(safeDate.getTime())
     ? "Invalid"
@@ -692,18 +692,18 @@ function EquityChart({
 />
 
           <Tooltip
+  formatter={(value: any) => {
+    const num = typeof value === "number" ? value : Number(value ?? 0);
+
+    return [`${num.toFixed(2)} R`, "Equity"];
+  }}
+  labelFormatter={(label) => label}
   contentStyle={{
     background: "#111",
     border: "1px solid #222",
     borderRadius: "12px",
     color: "#fff",
   }}
-  labelFormatter={(value) =>
-    new Date(Number(value)).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-    })
-  }
 />
 
           <Area
