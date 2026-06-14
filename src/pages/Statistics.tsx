@@ -48,7 +48,10 @@ type StatsTrade = Trade & {
 
 function Statistics() {
   const navigate = useNavigate();
-  const [trades, setTrades] = useState<StatsTrade[]>([]);
+  const [trades, setTrades] = useState<StatsTrade[]>(() => {
+  const cached = localStorage.getItem("stats_cache");
+  return cached ? JSON.parse(cached) : [];
+});
   const [mode, setMode] = useState<Mode>("all");
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -81,10 +84,16 @@ function Statistics() {
       })) || [];
 
     setTrades(formattedTrades);
+localStorage.setItem("stats_cache", JSON.stringify(formattedTrades));
   };
 
   useEffect(() => {
-    void Promise.resolve().then(loadTrades);
+    loadTrades(); // один раз сразу
+    const timer = setTimeout(() => {
+  loadTrades();
+}, 500);
+
+return () => clearTimeout(timer);
 
     const channel = supabase
       .channel("trades-statistics")
