@@ -249,15 +249,15 @@ function Statistics() {
     .slice()
     .sort(
       (a, b) =>
-        new Date(getTradeDate(a)).getTime() -
-        new Date(getTradeDate(b)).getTime()
+        getTradeDate(a).getTime() - getTradeDate(b).getTime()
     )
     .map((t, index) => {
       sum += t.result;
 
       return {
-        trade: index + 1,
+        trade: index + 1, // ВАЖНО: оставляем число
         equity: Number(sum.toFixed(2)),
+        date: getTradeDate(t), // добавим отдельно дату
       };
     });
 }, [filteredTrades]);
@@ -459,7 +459,7 @@ function Statistics() {
     EQUITY CURVE
   </div>
 
-  <div style={{ width: "100%", height: "220px" }}>
+  <div style={{ width: "100%", height: "320px" }}>
     <EquityChart data={equityCurveData} />
   </div>
 </section>
@@ -635,10 +635,18 @@ function EquityChart({
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data}>
+        <AreaChart
+  data={data}
+  margin={{
+    top: 10,
+    right: 10,
+    left: -20,
+    bottom: 10,
+  }}
+>
           <defs>
             <linearGradient id="equityFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#4ade80" stopOpacity={0.25} />
+              <stop offset="0%" stopColor="#4ade80" stopOpacity={0.12} />
               <stop offset="100%" stopColor="#4ade80" stopOpacity={0.02} />
             </linearGradient>
           </defs>
@@ -655,24 +663,26 @@ function EquityChart({
           />
 
           <YAxis
-            stroke="#666"
-            tick={{ fill: "#666", fontSize: 12 }}
-          />
+  stroke="#666"
+  tick={{ fill: "#666", fontSize: 12 }}
+  domain={[(dataMin) => dataMin - 1, (dataMax) => dataMax + 1]}
+/>
 
           <Tooltip
-            contentStyle={{
-              background: "#111",
-              border: "1px solid #222",
-              borderRadius: "12px",
-              color: "#fff",
-            }}
-          />
+  contentStyle={{
+    background: "#111",
+    border: "1px solid #222",
+    borderRadius: "12px",
+    color: "#fff",
+  }}
+  labelFormatter={(label) => label}
+/>
 
           <Area
-            type="monotone"
+            type="linear"
             dataKey="equity"
             stroke="#4ade80"
-            strokeWidth={2}
+            strokeWidth={1.5}
             fill="url(#equityFill)"
           />
         </AreaChart>
