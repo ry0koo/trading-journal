@@ -683,9 +683,9 @@ function EquityChart({
           />
 
           <XAxis
-  dataKey="id"
+  dataKey="xKey"
   tickFormatter={(_, index) =>
-    data[index]?.dateLabel ?? ""
+    data?.[index]?.dateLabel ?? ""
   }
   tick={{ fill: "#666", fontSize: 12 }}
   minTickGap={40}
