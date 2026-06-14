@@ -350,14 +350,14 @@ console.table(equityCurveData);
   return (
     <main
   style={{
-    ...widePageStyle, // или pageStyle в других файлах
-    opacity: animateIn ? 1 : 0,
-    transform: animateIn
-  ? "translateY(0)"
-  : "translateY(16px)",
+    ...widePageStyle,
+    width: "100%",
+    maxWidth: "100%",
+    overflowX: "hidden",
 
-transition:
-  "opacity 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
+    opacity: animateIn ? 1 : 0,
+    transform: animateIn ? "translateY(0)" : "translateY(16px)",
+    transition: "all 0.3s ease",
   }}
 >
       <header style={headerStyle}>
@@ -789,7 +789,7 @@ const filterGridStyle: CSSProperties = {
 
 const statsGridStyle: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
   gap: "14px",
 };
 function EquityChart({
