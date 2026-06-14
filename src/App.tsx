@@ -1,34 +1,35 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import { pushRoute } from "./navigationMemory";
 import Home from "./pages/Home";
 import NewTrade from "./pages/NewTrade";
 import Statistics from "./pages/Statistics";
 import History from "./pages/History";
-
-function RouteTracker({ children }: any) {
-  const location = useLocation();
-
-  useEffect(() => {
-    pushRoute(location.pathname);
-  }, [location.pathname]);
-
-  return children;
-}
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 function App() {
+  function AnimatedRoutes() {
+  const location = useLocation();
 
   return (
+    <TransitionGroup>
+      <CSSTransition
+        key={location.pathname}
+        classNames="page"
+        timeout={250}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<Home />} />
+          <Route path="/new-trade" element={<NewTrade />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="/history" element={<History />} />
+        </Routes>
+      </CSSTransition>
+    </TransitionGroup>
+  );
+}
+  return (
     <BrowserRouter>
-  <RouteTracker>
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/new-trade" element={<NewTrade />} />
-      <Route path="/statistics" element={<Statistics />} />
-      <Route path="/history" element={<History />} />
-    </Routes>
-  </RouteTracker>
-</BrowserRouter>
+      <AnimatedRoutes />
+    </BrowserRouter>
   );
 }
 

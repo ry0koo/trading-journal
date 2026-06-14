@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { popRoute } from "../navigationMemory";
+import PageWrapper from "../components/PageWrapper";
 import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
