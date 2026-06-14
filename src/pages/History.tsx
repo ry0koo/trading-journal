@@ -1,6 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { colors } from "../ui";
-import { useLocation } from "react-router-dom";
+
 import { popRoute } from "../navigationMemory";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
@@ -54,7 +54,7 @@ type PreviewImage = {
 };
 
 function History() {
-  const location = useLocation();
+
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
   const tradeDetailsRef = useRef<HTMLDivElement | null>(null);
@@ -1190,4 +1190,5 @@ const actionIconButtonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
+// temp fix
 export default History;
