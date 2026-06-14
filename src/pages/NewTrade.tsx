@@ -85,7 +85,7 @@ function NewTrade() {
       {
         instrument,
         direction,
-        result: Number(result),
+        result: Number(result.replace(",", ".")),
         session,
         trade_date: tradeDate,
         comment,
@@ -104,7 +104,7 @@ function NewTrade() {
     navigate("/history");
   };
 
-  const canSave = result.trim() !== "";
+  const canSave = result.trim() !== "" && !Number.isNaN(Number(result.replace(",", ".")));
 
   return (
     <main style={pageStyle}>
