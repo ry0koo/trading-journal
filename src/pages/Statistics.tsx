@@ -1,4 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -625,86 +634,49 @@ function EquityChart({
         padding: "12px",
       }}
     >
-      <svg
-  width="100%"
-  height="100%"
-  viewBox="0 0 100 50"
-  preserveAspectRatio="none"
->
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data}>
+          <defs>
+            <linearGradient id="equityFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#4ade80" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="#4ade80" stopOpacity={0.02} />
+            </linearGradient>
+          </defs>
 
-  {/* GRID */}
-  {[0, 1, 2, 3, 4].map((i) => (
-    <line
-      key={i}
-      x1="0"
-      x2="100"
-      y1={(i * 50) / 4}
-      y2={(i * 50) / 4}
-      stroke="#1a1a1a"
-      strokeWidth="0.3"
-    />
-  ))}
+          <CartesianGrid
+            stroke="#1a1a1a"
+            vertical={false}
+          />
 
-  {/* LINE */}
-  <polyline
-    fill="none"
-    stroke="#4ade80"
-    strokeWidth="0.6"
-    points={data
-      .map((d, i) => {
-        const x =
-          data.length === 1 ? 50 : (i / (data.length - 1)) * 100;
+          <XAxis
+            dataKey="trade"
+            stroke="#666"
+            tick={{ fill: "#666", fontSize: 12 }}
+          />
 
-        const max = Math.max(...data.map((d) => d.equity));
-        const min = Math.min(...data.map((d) => d.equity));
+          <YAxis
+            stroke="#666"
+            tick={{ fill: "#666", fontSize: 12 }}
+          />
 
-        const y = 50 - ((d.equity - min) / (max - min || 1)) * 50;
+          <Tooltip
+            contentStyle={{
+              background: "#111",
+              border: "1px solid #222",
+              borderRadius: "12px",
+              color: "#fff",
+            }}
+          />
 
-        return `${x},${y}`;
-      })
-      .join(" ")}
-  />
-
-  {/* DOTS + VALUES */}
-  {data.map((d, i) => {
-    const x =
-      data.length === 1 ? 50 : (i / (data.length - 1)) * 100;
-
-    const max = Math.max(...data.map((d) => d.equity));
-    const min = Math.min(...data.map((d) => d.equity));
-
-    const y = 50 - ((d.equity - min) / (max - min || 1)) * 50;
-
-    return (
-      <g key={i}>
-        <circle cx={x} cy={y} r="1.2" fill="#4ade80" />
-
-        <text
-          x={x}
-          y={y - 2}
-          fontSize="3"
-          fill="#ffffff"
-          textAnchor="middle"
-        >
-          {d.equity}
-        </text>
-      </g>
-    );
-  })}
-</svg>
-<div
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "10px",
-    color: "#666",
-    marginTop: "6px",
-  }}
->
-  {data.map((d) => (
-    <span key={d.trade}>{d.trade}</span>
-  ))}
-</div>
+          <Area
+            type="monotone"
+            dataKey="equity"
+            stroke="#4ade80"
+            strokeWidth={2}
+            fill="url(#equityFill)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }
