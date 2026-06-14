@@ -476,7 +476,7 @@ console.table(equityCurveData);
   onClick={() => setIsChartOpen(true)}
   style={{
     width: "100%",
-    height: "520px",
+    height: "260px",
     overflow: "hidden",
     borderRadius: "18px",
     cursor: "zoom-in",
@@ -508,24 +508,40 @@ console.table(equityCurveData);
       </section>
       {isChartOpen && (
   <div
-    onClick={() => setIsChartOpen(false)}
     style={{
       position: "fixed",
       inset: 0,
-      background: "rgba(0,0,0,0.9)",
+      background: "rgba(0,0,0,0.92)",
       zIndex: 9999,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "20px",
     }}
+    onClick={() => setIsChartOpen(false)}
   >
+    {/* КРЕСТИК */}
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        position: "absolute",
+        top: "20px",
+        right: "20px",
+        fontSize: "28px",
+        color: "#fff",
+        cursor: "pointer",
+        fontWeight: 700,
+      }}
+      onClickCapture={() => setIsChartOpen(false)}
+    >
+      ✕
+    </div>
+
+    {/* ГРАФИК */}
     <div
       onClick={(e) => e.stopPropagation()}
       style={{
         width: "95vw",
         height: "85vh",
-        maxWidth: "1600px",
       }}
     >
       <EquityChart data={equityCurveData} />
