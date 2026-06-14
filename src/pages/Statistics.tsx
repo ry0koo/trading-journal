@@ -629,7 +629,7 @@ function EquityChart({
 }: {
   data: { trade: Date; equity: number }[];
 }){
-  const formatDate = (value: string) => value;
+
   return (
     <div
       style={{
@@ -674,7 +674,7 @@ function EquityChart({
           <YAxis
   stroke="#666"
   tick={{ fill: "#666", fontSize: 12 }}
-  domain={["auto", "auto"]}
+
 />
 
           <Tooltip
