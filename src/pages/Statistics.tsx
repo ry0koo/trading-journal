@@ -636,10 +636,10 @@ function EquityChart({
   data,
 }: {
   data: {
-    trade: Date;
-    dateLabel: string;
-    equity: number;
-  }[];
+  trade: Date;
+  dateLabel: string;
+  equity: number;
+}[];
 }) {
 
   return (
