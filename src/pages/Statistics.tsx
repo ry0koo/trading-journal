@@ -552,6 +552,7 @@ console.table(equityCurveData);
           color={colors.red}
           onClick={() => openHistory("losses")}
         />
+
         <section style={{ ...sectionStyle, marginTop: "14px" }}>
   <div
     style={{
@@ -580,14 +581,9 @@ console.table(equityCurveData);
           border: `1px solid ${colors.border}`,
           borderRadius: "16px",
           padding: "14px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
         }}
       >
-        <div style={{ fontWeight: 900, fontSize: "16px" }}>
-          {s.session}
-        </div>
+        <div style={{ fontWeight: 900 }}>{s.session}</div>
 
         <div style={{ fontSize: "12px", color: colors.muted }}>
           {s.total} trades
