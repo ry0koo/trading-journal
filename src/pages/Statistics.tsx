@@ -263,10 +263,10 @@ function Statistics() {
   sum += Number(t.result ?? 0);
 
   return {
-    trade: safeDate,
-    dateLabel: label, // 🔥 ВАЖНО — ВСЕГДА STRING
-    equity: Number(sum.toFixed(2)),
-  };
+  timestamp: safeDate.getTime(),
+  dateLabel: label,
+  equity: Number(sum.toFixed(2)),
+};
 })
     .filter(Boolean);
 }, [filteredTrades]);
@@ -638,10 +638,10 @@ function EquityChart({
   data,
 }: {
   data: {
-  trade: Date;
-  dateLabel: string;
-  equity: number;
-}[];
+    timestamp: number;
+    dateLabel: string;
+    equity: number;
+  }[];
 }) {
 
   return (
@@ -654,17 +654,18 @@ function EquityChart({
     border: "1px solid #1a1a1a",
     overflow: "hidden",
     display: "flex",
+    padding: "0px",
   }}
 >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
   data={data}
   margin={{
-  top: 10,
-  right: 10,
-  left: 10,
-  bottom: 20,
-}}
+    top: 10,
+    right: 0,
+    left: 0,
+    bottom: 0,
+  }}
 >
           <defs>
             <linearGradient id="equityFill" x1="0" y1="0" x2="0" y2="1">
@@ -679,15 +680,23 @@ function EquityChart({
           />
 
           <XAxis
-  dataKey="dateLabel"
+  dataKey="timestamp"
+  type="number"
+  scale="time"
+  domain={["dataMin", "dataMax"]}
+  tickFormatter={(value) =>
+    new Date(value).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+    })
+  }
   tick={{ fill: "#666", fontSize: 12 }}
-  minTickGap={40}
 />
 
           <YAxis
+  width={25}
   stroke="#666"
   tick={{ fill: "#666", fontSize: 12 }}
-
 />
 
           <Tooltip
@@ -697,7 +706,12 @@ function EquityChart({
     borderRadius: "12px",
     color: "#fff",
   }}
-  labelFormatter={(label) => label}
+  labelFormatter={(value) =>
+    new Date(Number(value)).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+    })
+  }
 />
 
           <Area
