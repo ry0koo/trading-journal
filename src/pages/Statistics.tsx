@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getLastRoute } from "../navigationMemory";
+import { popRoute } from "../navigationMemory";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -327,9 +327,9 @@ console.table(equityCurveData);
         <button
           type="button"
           onClick={() => {
-  const prev = getLastRoute();
+  const prev = popRoute();
 
-  if (prev && prev !== location.pathname) {
+  if (prev) {
     navigate(prev);
   } else {
     navigate("/");

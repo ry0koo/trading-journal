@@ -1,9 +1,12 @@
-let lastRoute: string | null = null;
+let stack: string[] = [];
 
-export function setLastRoute(route: string) {
-  lastRoute = route;
+export function pushRoute(route: string) {
+  if (stack[stack.length - 1] !== route) {
+    stack.push(route);
+  }
 }
 
-export function getLastRoute() {
-  return lastRoute;
+export function popRoute() {
+  stack.pop(); // убираем текущую
+  return stack.pop(); // возвращаем предыдущую
 }

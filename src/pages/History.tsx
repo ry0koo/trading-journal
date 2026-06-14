@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
 import { colors } from "../ui";
-import { getLastRoute } from "../navigationMemory";
+import { useLocation } from "react-router-dom";
+import { popRoute } from "../navigationMemory";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useRef } from "react";
@@ -53,6 +54,7 @@ type PreviewImage = {
 };
 
 function History() {
+  const location = useLocation();
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
   const tradeDetailsRef = useRef<HTMLDivElement | null>(null);
@@ -351,9 +353,9 @@ const MONTHS = [
       <button
         type="button"
         onClick={() => {
-  const prev = getLastRoute();
+  const prev = popRoute();
 
-  if (prev && prev !== location.pathname) {
+  if (prev) {
     navigate(prev);
   } else {
     navigate("/");

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getLastRoute } from "../navigationMemory";
+import { popRoute } from "../navigationMemory";
 import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
@@ -164,9 +164,9 @@ const isEditMode = !!editId;
         <button
           type="button"
           onClick={() => {
-  const prev = getLastRoute();
+  const prev = popRoute();
 
-  if (prev && prev !== location.pathname) {
+  if (prev) {
     navigate(prev);
   } else {
     navigate("/");
