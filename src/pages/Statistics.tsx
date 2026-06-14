@@ -249,19 +249,26 @@ function Statistics() {
     .slice()
     .sort((a, b) => getTradeDate(a).getTime() - getTradeDate(b).getTime())
     .map((t) => {
-      const date = getTradeDate(t);
-      const ts = date.getTime();
+  const date = getTradeDate(t);
 
-      if (Number.isNaN(ts)) return null;
+  const safeDate = date;
 
-      sum += Number(t.result ?? 0);
+  const label = Number.isNaN(safeDate.getTime())
+    ? "Invalid"
+    : safeDate.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+      });
 
-      return {
-        timestamp: ts,
-        equity: Number(sum.toFixed(2)),
-      };
-    })
-    .filter((x): x is { timestamp: number; equity: number } => x !== null);
+  sum += Number(t.result ?? 0);
+
+  return {
+  timestamp: safeDate.getTime(),
+  dateLabel: label,
+  equity: Number(sum.toFixed(2)),
+};
+})
+    .filter(Boolean);
 }, [filteredTrades]);
   const winRate =
     totalTrades === 0 ? 0 : Math.round((wins.length / totalTrades) * 100);
@@ -631,9 +638,10 @@ function EquityChart({
   data,
 }: {
   data: {
-  timestamp: number;
-  equity: number;
-}[];
+    timestamp: number;
+    dateLabel: string;
+    equity: number;
+  }[];
 }) {
 
   return (
@@ -653,11 +661,11 @@ function EquityChart({
         <AreaChart
   data={data}
   margin={{
-  top: 10,
-  right: 10,
-  left: 0,
-  bottom: 10,
-}}
+    top: 10,
+    right: 0,
+    left: 0,
+    bottom: 0,
+  }}
 >
           <defs>
             <linearGradient id="equityFill" x1="0" y1="0" x2="0" y2="1">
@@ -672,15 +680,7 @@ function EquityChart({
           />
 
           <XAxis
-  dataKey="timestamp"
-  type="number"
-  domain={["dataMin", "dataMax"]}
-  tickFormatter={(value) =>
-    new Date(value).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-    })
-  }
+  dataKey="dateLabel"
   tick={{ fill: "#666", fontSize: 12 }}
   minTickGap={40}
 />
@@ -692,16 +692,18 @@ function EquityChart({
 />
 
           <Tooltip
-  formatter={(value: any) => [
-    `${Number(value).toFixed(2)} R`,
-    "Equity",
-  ]}
-  labelFormatter={(label) =>
-    new Date(Number(label)).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-    })
-  }
+  formatter={(value: any) => {
+    const num = typeof value === "number" ? value : Number(value ?? 0);
+
+    return [`${num.toFixed(2)} R`, "Equity"];
+  }}
+  labelFormatter={(label) => label}
+  contentStyle={{
+    background: "#111",
+    border: "1px solid #222",
+    borderRadius: "12px",
+    color: "#fff",
+  }}
 />
 
           <Area
