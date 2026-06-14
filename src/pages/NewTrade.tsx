@@ -3,7 +3,6 @@ import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-
 import { supabase } from "../lib/supabase";
 import {
   activeSegmentStyle,
@@ -59,6 +58,9 @@ const isEditMode = !!editId;
     setComment(data.comment || "");
     setBeforeImage(data.before_image || "");
     setAfterImage(data.after_image || "");
+    useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   };
 
   loadTrade();
