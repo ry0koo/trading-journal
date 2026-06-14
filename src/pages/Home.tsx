@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { usePageTransition } from "../hooks/usePageTransition";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import type { Trade } from "../types/trade";
@@ -10,7 +11,8 @@ import {
 } from "../ui";
 
 function Home() {
-
+  
+  const animateIn = usePageTransition();
   const navigate = useNavigate();
   const [trades, setTrades] = useState<Trade[]>(() => {
   const cached = localStorage.getItem("trades_cache");
@@ -75,7 +77,18 @@ localStorage.setItem("trades_cache", JSON.stringify(formattedTrades));
   const tradeLabel = totalTrades === 1 ? "TRADE" : "TRADES";
 
   return (
-    <main style={pageStyle}>
+    <main
+  style={{
+    ...pageStyle, // или pageStyle в других файлах
+    opacity: animateIn ? 1 : 0,
+    transform: animateIn
+  ? "translateY(0)"
+  : "translateY(16px)",
+
+transition:
+  "opacity 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
+  }}
+>
       <section
         style={{
           display: "flex",
@@ -221,5 +234,5 @@ function formatResult(value: number) {
   const text = Number.isInteger(value) ? String(value) : value.toFixed(1);
   return `${value >= 0 ? "+" : ""}${text}R`;
 }
-// temp fix
+
 export default Home;

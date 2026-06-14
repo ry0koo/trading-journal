@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePageTransition } from "../hooks/usePageTransition";
 import { popRoute } from "../navigationMemory";
 import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -25,6 +26,7 @@ type ScreenshotType = "before" | "after";
 
 function NewTrade() {
   
+  const animateIn = usePageTransition();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -159,7 +161,18 @@ const isEditMode = !!editId;
   const canSave = result.trim() !== "" && !Number.isNaN(Number(result.replace(",", ".")));
 
   return (
-    <main style={pageStyle}>
+    <main
+  style={{
+    ...pageStyle, // или pageStyle в других файлах
+    opacity: animateIn ? 1 : 0,
+    transform: animateIn
+  ? "translateY(0)"
+  : "translateY(16px)",
+
+transition:
+  "opacity 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
+  }}
+>
       <header style={headerStyle}>
         <button
           type="button"

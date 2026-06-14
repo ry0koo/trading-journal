@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { usePageTransition } from "../hooks/usePageTransition";
 import { colors } from "../ui";
 import { popRoute } from "../navigationMemory";
 import { useEffect, useMemo, useState } from "react";
@@ -54,12 +55,7 @@ type PreviewImage = {
 
 function History() {
 
-  const [animateIn, setAnimateIn] = useState(false);
-
-useEffect(() => {
-  const timer = setTimeout(() => setAnimateIn(true), 10);
-  return () => clearTimeout(timer);
-}, []);
+  const animateIn = usePageTransition();
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
   const tradeDetailsRef = useRef<HTMLDivElement | null>(null);
@@ -355,12 +351,14 @@ const MONTHS = [
   return (
   <main
   style={{
-    ...widePageStyle,
+    ...widePageStyle, // или pageStyle в других файлах
     opacity: animateIn ? 1 : 0,
     transform: animateIn
-      ? "translateY(0)"
-      : "translateY(12px)",
-    transition: "opacity 250ms ease, transform 250ms ease",
+  ? "translateY(0)"
+  : "translateY(16px)",
+
+transition:
+  "opacity 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
   }}
 >
     <header style={headerStyle}>
@@ -1215,6 +1213,4 @@ const actionIconButtonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-// temp fix
-// temp fix
 export default History;

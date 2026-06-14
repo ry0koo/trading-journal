@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { usePageTransition } from "../hooks/usePageTransition";
 import { popRoute } from "../navigationMemory";
 import {
   ResponsiveContainer,
@@ -58,12 +59,7 @@ type StatsTrade = Trade & {
 
 function Statistics() {
   
-  const [animateIn, setAnimateIn] = useState(false);
-
-useEffect(() => {
-  const timer = setTimeout(() => setAnimateIn(true), 10);
-  return () => clearTimeout(timer);
-}, []);
+  const animateIn = usePageTransition();
   const navigate = useNavigate();
   const [trades, setTrades] = useState<StatsTrade[]>(() => {
   const cached = localStorage.getItem("stats_cache");
@@ -330,12 +326,14 @@ console.table(equityCurveData);
   return (
     <main
   style={{
-    ...widePageStyle,
+    ...widePageStyle, // или pageStyle в других файлах
     opacity: animateIn ? 1 : 0,
     transform: animateIn
-      ? "translateY(0)"
-      : "translateY(12px)",
-    transition: "opacity 250ms ease, transform 250ms ease",
+  ? "translateY(0)"
+  : "translateY(16px)",
+
+transition:
+  "opacity 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
   }}
 >
       <header style={headerStyle}>
@@ -796,6 +794,5 @@ function EquityChart({
     </div>
   );
 }
-// temp fix
 // temp fix
 export default Statistics;
