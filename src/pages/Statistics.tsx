@@ -59,61 +59,70 @@ function Statistics() {
   const [selectedWeek, setSelectedWeek] = useState(0);
 
   const loadTrades = async () => {
-    const { data, error } = await supabase
-      .from("trades")
-      .select("*")
-      .order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("trades")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error(error);
-      return;
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const formattedTrades: StatsTrade[] =
+    data?.map((trade) => ({
+      id: trade.id,
+      instrument: trade.instrument,
+      direction: trade.direction,
+      result: Number(trade.result),
+      comment: trade.comment || "",
+      beforeImage: trade.before_image,
+      afterImage: trade.after_image,
+      tradeDate: trade.trade_date,
+      session: trade.session,
+      createdAt: trade.created_at,
+    })) || [];
+
+  setTrades(formattedTrades);
+
+  localStorage.setItem("stats_cache", JSON.stringify(formattedTrades));
+};
+
+    useEffect(() => {
+  // 1. моментально показываем кеш
+  const cached = localStorage.getItem("stats_cache");
+
+  if (cached) {
+    try {
+      setTrades(JSON.parse(cached));
+    } catch (e) {
+      console.error("cache error", e);
     }
+  }
 
-    const formattedTrades: StatsTrade[] =
-      data?.map((trade) => ({
-        id: trade.id,
-        instrument: trade.instrument,
-        direction: trade.direction,
-        result: Number(trade.result),
-        comment: trade.comment || "",
-        beforeImage: trade.before_image,
-        afterImage: trade.after_image,
-        tradeDate: trade.trade_date,
-        session: trade.session,
-        createdAt: trade.created_at,
-      })) || [];
-
-    setTrades(formattedTrades);
-localStorage.setItem("stats_cache", JSON.stringify(formattedTrades));
-  };
-
-  useEffect(() => {
-    loadTrades(); // один раз сразу
-    const timer = setTimeout(() => {
+  // 2. загружаем свежие данные
   loadTrades();
-}, 500);
 
-return () => clearTimeout(timer);
+  // 3. realtime
+  const channel = supabase
+    .channel("trades-statistics")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "trades",
+      },
+      () => {
+        loadTrades();
+      }
+    )
+    .subscribe();
 
-    const channel = supabase
-      .channel("trades-statistics")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "trades",
-        },
-        () => {
-          loadTrades();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
 
   const years = useMemo(() => {
     const uniqueYears: number[] = [
