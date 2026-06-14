@@ -680,17 +680,9 @@ function EquityChart({
           />
 
           <XAxis
-  dataKey="timestamp"
-  type="number"
-  scale="time"
-  domain={["dataMin", "dataMax"]}
-  tickFormatter={(value) =>
-    new Date(value).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-    })
-  }
+  dataKey="dateLabel"
   tick={{ fill: "#666", fontSize: 12 }}
+  minTickGap={40}
 />
 
           <YAxis
