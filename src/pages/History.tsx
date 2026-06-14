@@ -56,6 +56,7 @@ function History() {
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
   const tradeDetailsRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<number>(0);
+  const [highlightedTradeId, setHighlightedTradeId] = useState<string | null>(null);
 
 async function loadTrades() {
   const { data, error } = await supabase
@@ -547,20 +548,38 @@ const MONTHS = [
   }, 50);
 }}
                     style={{
-                      width: "100%",
-                      display: "grid",
-                      whiteSpace: "nowrap",
-                      gridTemplateColumns: "1.8fr 0.9fr 0.9fr 1.1fr 20px",
-                      gap: "16px",
-                      alignItems: "center",
-                      padding: "14px 16px",
-                      background: isSelected ? "#151515" : "#0f0f0f",
-                      border: "none",
-                      borderBottom: "1px solid #1f1f1f",
-                      color: "#fff",
-                      textAlign: "left" as CSSProperties["textAlign"],
-                      cursor: "pointer",
-                    }}
+  width: "100%",
+  display: "grid",
+  whiteSpace: "nowrap",
+  gridTemplateColumns: "1.8fr 0.9fr 0.9fr 1.1fr 20px",
+  gap: "16px",
+  alignItems: "center",
+  padding: "14px 16px",
+
+  background:
+    highlightedTradeId === trade.id
+      ? "rgba(74,222,128,0.12)"
+      : isSelected
+      ? "#151515"
+      : "#0f0f0f",
+
+  border: highlightedTradeId === trade.id
+    ? "1px solid rgba(74,222,128,0.4)"
+    : "none",
+
+  borderBottom: "1px solid #1f1f1f",
+
+  boxShadow:
+    highlightedTradeId === trade.id
+      ? "0 0 16px rgba(74,222,128,0.2)"
+      : "none",
+
+  transition: "all 0.35s ease",
+
+  color: "#fff",
+  textAlign: "left" as CSSProperties["textAlign"],
+  cursor: "pointer",
+}}
                   >
                     <div
                       style={{
@@ -761,6 +780,8 @@ const MONTHS = [
   <button
     type="button"
     onClick={() => {
+  const closedTradeId = selectedTradeId;
+
   setSelectedTradeId(null);
 
   setTimeout(() => {
@@ -768,6 +789,14 @@ const MONTHS = [
       top: listRef.current,
       behavior: "smooth",
     });
+
+    if (closedTradeId) {
+      setHighlightedTradeId(closedTradeId);
+
+      setTimeout(() => {
+        setHighlightedTradeId(null);
+      }, 1500);
+    }
   }, 50);
 }}
     style={actionIconButtonStyle}
