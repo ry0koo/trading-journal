@@ -233,6 +233,25 @@ function Statistics() {
     (sum, trade) => sum + trade.result,
     0
   );
+  const equityCurveData = useMemo(() => {
+  let sum = 0;
+
+  return filteredTrades
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(getTradeDate(a)).getTime() -
+        new Date(getTradeDate(b)).getTime()
+    )
+    .map((t, index) => {
+      sum += t.result;
+
+      return {
+        trade: index + 1,
+        equity: Number(sum.toFixed(2)),
+      };
+    });
+}, [filteredTrades]);
   const winRate =
     totalTrades === 0 ? 0 : Math.round((wins.length / totalTrades) * 100);
 
@@ -417,6 +436,24 @@ function Statistics() {
           {formatResultR(totalResult)}
         </div>
       </section>
+      <section style={{ ...sectionStyle, marginBottom: "14px" }}>
+
+  <div
+    style={{
+      color: colors.muted,
+      fontSize: "12px",
+      fontWeight: 800,
+      letterSpacing: "0.08em",
+      marginBottom: "14px",
+    }}
+  >
+    EQUITY CURVE
+  </div>
+
+  <div style={{ width: "100%", height: "220px" }}>
+    <EquityChart data={equityCurveData} />
+  </div>
+</section>
 
       <section style={statsGridStyle}>
         <StatCard
@@ -572,5 +609,32 @@ const statsGridStyle: CSSProperties = {
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gap: "14px",
 };
-
+function EquityChart({
+  data,
+}: {
+  data: { trade: number; equity: number }[];
+}) {
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        borderRadius: "18px",
+        background: "#0a0a0a",
+        border: "1px solid #1a1a1a",
+        padding: "12px",
+      }}
+    >
+      <pre
+        style={{
+          color: "#fff",
+          fontSize: "12px",
+          opacity: 0.7,
+        }}
+      >
+        {JSON.stringify(data, null, 2)}
+      </pre>
+    </div>
+  );
+}
 export default Statistics;
