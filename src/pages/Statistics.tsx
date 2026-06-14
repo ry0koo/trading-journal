@@ -680,9 +680,16 @@ function EquityChart({
           />
 
           <XAxis
-  dataKey="dateLabel"
+  dataKey="timestamp"
+  type="number"
+  domain={["dataMin", "dataMax"]}
+  tickFormatter={(value) =>
+    new Date(value).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+    })
+  }
   tick={{ fill: "#666", fontSize: 12 }}
-  minTickGap={40}
 />
 
           <YAxis
@@ -697,7 +704,12 @@ function EquityChart({
 
     return [`${num.toFixed(2)} R`, "Equity"];
   }}
-  labelFormatter={(label) => label}
+  labelFormatter={(label) =>
+  new Date(Number(label)).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+  })
+}
   contentStyle={{
     background: "#111",
     border: "1px solid #222",
