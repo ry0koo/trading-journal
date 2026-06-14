@@ -54,6 +54,12 @@ type PreviewImage = {
 
 function History() {
 
+  const [animateIn, setAnimateIn] = useState(false);
+
+useEffect(() => {
+  const timer = setTimeout(() => setAnimateIn(true), 10);
+  return () => clearTimeout(timer);
+}, []);
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
   const tradeDetailsRef = useRef<HTMLDivElement | null>(null);
@@ -347,7 +353,16 @@ const MONTHS = [
       : "TRADES";
 
   return (
-  <main style={widePageStyle}>
+  <main
+  style={{
+    ...widePageStyle,
+    opacity: animateIn ? 1 : 0,
+    transform: animateIn
+      ? "translateY(0)"
+      : "translateY(12px)",
+    transition: "opacity 250ms ease, transform 250ms ease",
+  }}
+>
     <header style={headerStyle}>
       <button
         type="button"

@@ -10,6 +10,12 @@ import {
 } from "../ui";
 
 function Home() {
+  const [animateIn, setAnimateIn] = useState(false);
+
+useEffect(() => {
+  const timer = setTimeout(() => setAnimateIn(true), 10);
+  return () => clearTimeout(timer);
+}, []);
   const navigate = useNavigate();
   const [trades, setTrades] = useState<Trade[]>(() => {
   const cached = localStorage.getItem("trades_cache");
@@ -74,7 +80,16 @@ localStorage.setItem("trades_cache", JSON.stringify(formattedTrades));
   const tradeLabel = totalTrades === 1 ? "TRADE" : "TRADES";
 
   return (
-    <main style={pageStyle}>
+    <main
+  style={{
+    ...widePageStyle,
+    opacity: animateIn ? 1 : 0,
+    transform: animateIn
+      ? "translateY(0)"
+      : "translateY(12px)",
+    transition: "opacity 250ms ease, transform 250ms ease",
+  }}
+>
       <section
         style={{
           display: "flex",

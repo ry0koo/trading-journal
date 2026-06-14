@@ -58,6 +58,12 @@ type StatsTrade = Trade & {
 
 function Statistics() {
   
+  const [animateIn, setAnimateIn] = useState(false);
+
+useEffect(() => {
+  const timer = setTimeout(() => setAnimateIn(true), 10);
+  return () => clearTimeout(timer);
+}, []);
   const navigate = useNavigate();
   const [trades, setTrades] = useState<StatsTrade[]>(() => {
   const cached = localStorage.getItem("stats_cache");
@@ -322,7 +328,16 @@ console.table(equityCurveData);
       .toUpperCase();
 
   return (
-    <main style={widePageStyle}>
+    <main
+  style={{
+    ...widePageStyle,
+    opacity: animateIn ? 1 : 0,
+    transform: animateIn
+      ? "translateY(0)"
+      : "translateY(12px)",
+    transition: "opacity 250ms ease, transform 250ms ease",
+  }}
+>
       <header style={headerStyle}>
         <button
           type="button"
