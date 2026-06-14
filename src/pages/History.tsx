@@ -2,6 +2,7 @@ import { supabase } from "../lib/supabase";
 import { colors } from "../ui";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { useRef } from "react";
 import {
   useSearchParams,
   useNavigate,
@@ -53,6 +54,7 @@ type PreviewImage = {
 function History() {
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
+  const tradeDetailsRef = useRef<HTMLDivElement | null>(null);
 
 async function loadTrades() {
   const { data, error } = await supabase
@@ -531,7 +533,16 @@ const MONTHS = [
                   <button
                     key={trade.id}
                     type="button"
-                    onClick={() => setSelectedTradeId(trade.id)}
+                    onClick={() => {
+  setSelectedTradeId(trade.id);
+
+  setTimeout(() => {
+    tradeDetailsRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 50);
+}}
                     style={{
                       width: "100%",
                       display: "grid",
@@ -602,7 +613,8 @@ const MONTHS = [
       )}
 
       {selectedTrade && (
-        <div
+  <div
+    ref={tradeDetailsRef}
           style={{
             marginTop: "24px",
             background: "#111",
@@ -745,7 +757,14 @@ const MONTHS = [
 
   <button
     type="button"
-    onClick={() => setSelectedTradeId(null)}
+    onClick={() => {
+  setSelectedTradeId(null);
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}}
     style={actionIconButtonStyle}
   >
     X
