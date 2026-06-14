@@ -349,7 +349,13 @@ const MONTHS = [
     <header style={headerStyle}>
       <button
         type="button"
-        onClick={() => navigate("/")}
+        onClick={() => {
+  if (window.history.length > 1) {
+    navigate(-1);
+  } else {
+    navigate("/");
+  }
+}}
         style={quietButtonStyle}
       >
         BACK
