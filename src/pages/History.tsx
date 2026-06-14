@@ -366,7 +366,15 @@ const MONTHS = [
         BACK
       </button>
 
-      <h1 style={titleStyle}>HISTORY</h1>
+      <h1
+  style={titleStyle}
+  onClick={() => {
+    navigate("/history");
+    window.scrollTo(0, 0);
+  }}
+>
+  HISTORY
+</h1>
     </header>
 
     <section style={{ ...sectionStyle, marginBottom: "14px" }}>
