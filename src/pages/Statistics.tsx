@@ -378,7 +378,7 @@ function Statistics() {
             marginBottom: "14px",
           }}
         >
-          TOTAL R
+          TOTAL RESULT
         </div>
         <div
           style={{
@@ -418,13 +418,18 @@ function Statistics() {
 
 function getTradeDate(trade: StatsTrade) {
   const source = trade.tradeDate || trade.createdAt;
-  const date = new Date(source);
 
-  if (Number.isNaN(date.getTime())) {
-    return new Date(trade.createdAt);
+  if (!source) {
+    return new Date();
   }
 
-  return date;
+  // ⚠️ КЛЮЧЕВОЙ ФИКС: ручной парсинг даты YYYY-MM-DD
+  if (typeof source === "string" && source.includes("-")) {
+    const [y, m, d] = source.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  return new Date(source);
 }
 
 function formatResultR(value: number) {
