@@ -762,8 +762,15 @@ const MONTHS = [
     <button
       style={menuItemStyle}
       onClick={() => {
-        navigate(`/new-trade?edit=${selectedTrade.id}`);
-      }}
+  navigate(`/new-trade?edit=${selectedTrade.id}`);
+
+  requestAnimationFrame(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "instant" as ScrollBehavior,
+    });
+  });
+}}
     >
       EDIT
     </button>
