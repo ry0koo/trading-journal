@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import PageWrapper from "../components/PageWrapper";
 import { popRoute } from "../navigationMemory";
 import {
   ResponsiveContainer,
@@ -782,5 +781,6 @@ function EquityChart({
     </div>
   );
 }
+// temp fix
 // temp fix
 export default Statistics;

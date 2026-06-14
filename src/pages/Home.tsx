@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PageWrapper from "../components/PageWrapper";
 import { supabase } from "../lib/supabase";
 import type { Trade } from "../types/trade";
 import {
@@ -222,4 +221,5 @@ function formatResult(value: number) {
   return `${value >= 0 ? "+" : ""}${text}R`;
 }
 
+// temp fix
 export default Home;
