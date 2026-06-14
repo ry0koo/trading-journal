@@ -55,6 +55,7 @@ type PreviewImage = {
 
 function History() {
 
+  const [animateList, setAnimateList] = useState(false);
   const animateIn = usePageTransition();
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
@@ -91,6 +92,9 @@ async function loadTrades() {
 }
 
 useEffect(() => {
+  setTimeout(() => {
+  setAnimateList(true);
+}, 100);
   void Promise.resolve().then(loadTrades);
 
   const channel = supabase
@@ -561,7 +565,7 @@ transition:
                 <div />
               </div>
 
-              {filteredTrades.map((trade) => {
+              {filteredTrades.map((trade, index) => {
                 const tradeDate = getTradeDate(trade);
                 const isSelected = selectedTradeId === trade.id;
 
@@ -608,11 +612,19 @@ transition:
       ? "0 0 16px rgba(74,222,128,0.2)"
       : "none",
 
-  transition: "all 0.35s ease",
 
   color: "#fff",
   textAlign: "left" as CSSProperties["textAlign"],
   cursor: "pointer",
+  opacity: animateList ? 1 : 0,
+
+transform: animateList
+  ? "translateY(0px)"
+  : "translateY(12px)",
+
+transition: "all 0.35s ease",
+
+transitionDelay: `${index * 50}ms`,
 }}
                   >
                     <div
