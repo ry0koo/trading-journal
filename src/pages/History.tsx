@@ -134,6 +134,7 @@ useEffect(() => {
   const activeMonth = Number(searchParams.get("month"));
   const activeQuarter = Number(searchParams.get("quarter"));
   const activeWeekStart = searchParams.get("weekStart");
+  const activeDay = searchParams.get("day");
 
   const weeksForActiveYear = useMemo(
     () => buildWeeksForYear(trades, activeYear),
@@ -199,6 +200,15 @@ const MONTHS = [
 
   const filteredTrades = useMemo(() => {
     let result = [...trades];
+
+    if (activeDay) {
+  result = result.filter(
+    (trade) =>
+      formatLocalDateKey(getTradeDate(trade)) === activeDay
+  );
+
+  return result.sort(sortTradesDesc);
+}
 
     if (activeType === "wins") {
       result = result.filter((trade) => trade.result > 0);
@@ -272,6 +282,7 @@ const MONTHS = [
     activeMonth,
     activeQuarter,
     activeWeekStart,
+    activeDay,
     weeksForActiveYear,
   ]);
 
