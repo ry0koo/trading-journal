@@ -546,7 +546,12 @@ console.table(equityCurveData);
     cursor: "zoom-in",
   }}
 >
-  <EquityChart data={equityCurveData} />
+  <EquityChart
+  data={equityCurveData}
+  onPointClick={(point) => {
+    navigate(`/history?day=${point.dayKey}`);
+  }}
+/>
 </div>
 </section>
 
@@ -665,7 +670,14 @@ console.table(equityCurveData);
         height: "85vh",
       }}
     >
-      <EquityChart data={equityCurveData} />
+      <EquityChart
+  data={equityCurveData}
+  onPointClick={(point) => {
+    setIsChartOpen(false);
+
+    navigate(`/history?day=${point.dayKey}`);
+  }}
+/>
     </div>
   </div>
 )}
@@ -805,14 +817,19 @@ const statsGridStyle: CSSProperties = {
 };
 function EquityChart({
   data,
+  onPointClick,
 }: {
   data: {
     timestamp: number;
+    dayKey: string;
     dateLabel: string;
     equity: number;
+    tradesCount: number;
   }[];
-}) {
 
+  onPointClick?: (point: any) => void;
+})
+{
   return (
     <div
   style={{
@@ -834,6 +851,13 @@ function EquityChart({
     right: 0,
     left: 0,
     bottom: 0,
+  }}
+  onClick={(state: any) => {
+    const point = state?.activePayload?.[0]?.payload;
+
+    if (point && onPointClick) {
+      onPointClick(point);
+    }
   }}
 >
           <defs>
