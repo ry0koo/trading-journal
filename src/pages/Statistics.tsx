@@ -254,8 +254,10 @@ function Statistics() {
     string,
     {
       timestamp: number;
+      dayKey: string;
       dateLabel: string;
       equity: number;
+      tradesCount: number;
     }
   >();
 
@@ -266,13 +268,12 @@ function Statistics() {
   sorted.forEach((trade) => {
     const date = getTradeDate(trade);
 
-    if (Number.isNaN(date.getTime())) {
-      return;
-    }
+    if (Number.isNaN(date.getTime())) return;
 
     sum += Number(trade.result ?? 0);
 
     const dayKey = formatLocalDateKey(date);
+    const existing = byDay.get(dayKey);
 
     byDay.set(dayKey, {
       timestamp: new Date(
@@ -280,13 +281,13 @@ function Statistics() {
         date.getMonth(),
         date.getDate()
       ).getTime(),
-
+      dayKey,
       dateLabel: date.toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "short",
       }),
-
       equity: Number(sum.toFixed(2)),
+      tradesCount: (existing?.tradesCount ?? 0) + 1,
     });
   });
 
@@ -870,13 +871,20 @@ function EquityChart({
 
           <Tooltip
   formatter={(value: any) => {
-    const num = typeof value === "number" ? value : Number(value ?? 0);
+    const num =
+      typeof value === "number"
+        ? value
+        : Number(value ?? 0);
 
     return [`${num.toFixed(2)} R`, "Equity"];
   }}
-  labelFormatter={(_, payload) =>
-  payload?.[0]?.payload?.dateLabel ?? ""
-}
+  labelFormatter={(_, payload) => {
+    const point = payload?.[0]?.payload;
+
+    if (!point) return "";
+
+    return `${point.dateLabel} • ${point.tradesCount} trades`;
+  }}
   contentStyle={{
     background: "#111",
     border: "1px solid #222",
