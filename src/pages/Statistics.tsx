@@ -250,31 +250,47 @@ function Statistics() {
   const equityCurveData = useMemo(() => {
   let sum = 0;
 
-  return filteredTrades
-    .slice()
-    .sort((a, b) => getTradeDate(a).getTime() - getTradeDate(b).getTime())
-    .map((t) => {
-  const date = getTradeDate(t);
+  const byDay = new Map<
+    string,
+    {
+      timestamp: number;
+      dateLabel: string;
+      equity: number;
+    }
+  >();
 
-  const safeDate = date;
+  const sorted = [...filteredTrades].sort(
+    (a, b) => getTradeDate(a).getTime() - getTradeDate(b).getTime()
+  );
 
-  const label = Number.isNaN(safeDate.getTime())
-    ? "Invalid"
-    : safeDate.toLocaleDateString("en-GB", {
+  sorted.forEach((trade) => {
+    const date = getTradeDate(trade);
+
+    if (Number.isNaN(date.getTime())) {
+      return;
+    }
+
+    sum += Number(trade.result ?? 0);
+
+    const dayKey = formatLocalDateKey(date);
+
+    byDay.set(dayKey, {
+      timestamp: new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      ).getTime(),
+
+      dateLabel: date.toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "short",
-      });
+      }),
 
-  sum += Number(t.result ?? 0);
+      equity: Number(sum.toFixed(2)),
+    });
+  });
 
-  return {
-  timestamp: safeDate.getTime(),
-  dateLabel: label,
-  equity: Number(sum.toFixed(2)),
-  xKey: `${safeDate.getTime()}-${sum}`,
-};
-})
-    .filter(Boolean);
+  return Array.from(byDay.values());
 }, [filteredTrades]);
 console.log("EQUITY DATA");
 console.table(equityCurveData);
@@ -832,12 +848,18 @@ function EquityChart({
           />
 
           <XAxis
-  dataKey="xKey"
-  tickFormatter={(_, index) =>
-    data?.[index]?.dateLabel ?? ""
+  dataKey="timestamp"
+  type="number"
+  scale="time"
+  domain={["dataMin", "dataMax"]}
+  tickFormatter={(value) =>
+    new Date(value).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+    })
   }
   tick={{ fill: "#666", fontSize: 12 }}
-  minTickGap={40}
+  minTickGap={24}
 />
 
           <YAxis
