@@ -31,6 +31,9 @@ function Statistics() {
   const [selectedQuarter, setSelectedQuarter] = useState(1);
   const [selectedWeek, setSelectedWeek] = useState(0);
 
+  // For graph interaction (select then navigate)
+  const [selectedPointKey, setSelectedPointKey] = useState<string | null>(null);
+
   // ── Derived filter options ──────────────────────────────────────────────
   const years = useMemo(() => {
     const set = new Set(trades.map((t) => getTradeDate(t).getFullYear()));
@@ -155,6 +158,18 @@ function Statistics() {
     navigate(`/history?${params.toString()}`);
   };
 
+  const handlePointClick = (point: { dayKey: string }) => {
+    if (selectedPointKey === point.dayKey) {
+      navigate(`/history?day=${point.dayKey}`);
+    } else {
+      setSelectedPointKey(point.dayKey);
+    }
+  };
+
+  const handleSessionClick = (session: string) => {
+    navigate(`/history?session=${session}`);
+  };
+
   const formatWeekLabel = (date: Date) =>
     date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }).toUpperCase();
 
@@ -185,15 +200,15 @@ function Statistics() {
       />
 
       {/* Hero Stats */}
-      <Card style={{ marginBottom: "16px", padding: "32px 28px", textAlign: "center" }}>
+      <Card style={{ marginBottom: "16px", padding: "40px 32px", textAlign: "center" }}>
         <div style={sectionLabelStyle}>TOTAL PERFORMANCE</div>
         <div
           style={{
-            fontSize: "clamp(60px, 16vw, 84px)",
+            fontSize: "clamp(64px, 18vw, 92px)",
             fontWeight: 900,
-            lineHeight: 0.9,
+            lineHeight: 0.85,
             color: totalResult >= 0 ? "var(--green)" : "var(--red)",
-            letterSpacing: "-0.04em",
+            letterSpacing: "-0.05em",
           }}
         >
           {totalTrades === 0 ? "—" : formatResultR(totalResult)}
@@ -204,7 +219,8 @@ function Statistics() {
       <div style={{ height: "320px", marginBottom: "16px" }}>
         <EquityChart
           data={equityCurveData}
-          onPointClick={(point) => navigate(`/history?day=${point.dayKey}`)}
+          onPointClick={handlePointClick}
+          selectedPointKey={selectedPointKey}
         />
       </div>
 
@@ -242,7 +258,11 @@ function Statistics() {
             }}
           >
             {sessionStats.map((s) => (
-              <SessionCard key={s.session} {...s} />
+              <SessionCard 
+                key={s.session} 
+                {...s} 
+                onClick={() => handleSessionClick(s.session)}
+              />
             ))}
           </div>
         </div>

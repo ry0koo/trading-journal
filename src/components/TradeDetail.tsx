@@ -27,7 +27,7 @@ export const TradeDetail: React.FC<TradeDetailProps> = ({
     <Card
       style={{
         marginTop: "24px",
-        padding: "24px",
+        padding: "32px",
         background: "var(--panel-soft)",
         border: "1px solid var(--border-strong)",
         animation: "fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)",

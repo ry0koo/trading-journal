@@ -52,12 +52,15 @@ function History() {
   const activeQuarter = Number(searchParams.get("quarter"));
   const activeWeekStart = searchParams.get("weekStart");
   const activeDay = searchParams.get("day");
+  const activeSession = searchParams.get("session");
 
   const activeDayLabel = activeDay
     ? new Date(activeDay)
         .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
         .toUpperCase()
     : null;
+
+  const activeSessionLabel = activeSession ? activeSession.toUpperCase() : null;
 
   // ── Derived data ─────────────────────────────────────────────────────────
   const years = useMemo(() => {
@@ -92,6 +95,10 @@ function History() {
   // ── Filtering ────────────────────────────────────────────────────────────
   const filteredTrades = useMemo(() => {
     let result = [...trades];
+
+    if (activeSession) {
+      result = result.filter((t) => t.session === activeSession);
+    }
 
     if (activeDay) {
       return result
@@ -145,7 +152,7 @@ function History() {
     }
 
     return result.sort(sortDesc);
-  }, [trades, activeMode, activeType, activeYear, activeMonth, activeQuarter, activeWeekStart, activeDay, weeksForActiveYear]);
+  }, [trades, activeMode, activeType, activeYear, activeMonth, activeQuarter, activeWeekStart, activeDay, activeSession, weeksForActiveYear]);
 
   const selectedTrade = selectedTradeId
     ? filteredTrades.find((t) => t.id === selectedTradeId) ?? null
@@ -257,7 +264,7 @@ function History() {
 
       {/* Period / day header */}
       <div style={{ marginBottom: "24px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-        {activeDay ? (
+        {activeDay || activeSession ? (
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
               <Button
@@ -267,7 +274,7 @@ function History() {
               >
                 ← ALL
               </Button>
-              <h2 style={{ fontSize: "24px", fontWeight: 900 }}>{activeDayLabel}</h2>
+              <h2 style={{ fontSize: "24px", fontWeight: 900 }}>{activeDayLabel || activeSessionLabel}</h2>
             </div>
             <div style={{ color: "var(--text-secondary)", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em" }}>
               {filteredTrades.length} {countLabel}

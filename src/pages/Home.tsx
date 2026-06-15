@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTrades } from "../hooks/useTrades";
 import { PageWrapper } from "../components/PageWrapper";
-import { pageStyle } from "../ui";
 import { formatResultR, formatDateOnly, getTradeDate } from "../utils/dateUtils";
 import { Button, Card, Badge } from "../components/PremiumUI";
 
@@ -23,7 +22,7 @@ function Home() {
   }, [trades]);
 
   return (
-    <PageWrapper style={{ ...pageStyle, maxWidth: "480px" }}>
+    <PageWrapper style={{ padding: "20px 16px 40px", maxWidth: "480px", margin: "0 auto" }}>
       <section style={{ display: "flex", flexDirection: "column", gap: "40px", paddingTop: "20px" }}>
 
         {/* Hero Section */}
@@ -83,7 +82,8 @@ function Home() {
             size="lg"
             fullWidth
             onClick={() => navigate("/new-trade")}
-            style={{ fontSize: "16px", height: "64px" }}
+            className="glow-button glow-button-primary"
+            style={{ fontSize: "16px", height: "64px", textTransform: "uppercase" }}
           >
             + NEW TRADE
           </Button>
@@ -93,7 +93,8 @@ function Home() {
               variant="secondary"
               size="lg"
               onClick={() => navigate("/history")}
-              style={{ height: "56px" }}
+              className="glow-button"
+              style={{ height: "56px", fontSize: "14px", fontWeight: 800, textTransform: "uppercase" }}
             >
               HISTORY
             </Button>
@@ -101,7 +102,8 @@ function Home() {
               variant="secondary"
               size="lg"
               onClick={() => navigate("/statistics")}
-              style={{ height: "56px" }}
+              className="glow-button"
+              style={{ height: "56px", fontSize: "14px", fontWeight: 800, textTransform: "uppercase" }}
             >
               STATISTICS
             </Button>

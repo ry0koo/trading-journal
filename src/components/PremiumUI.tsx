@@ -11,8 +11,12 @@ export const Card: React.FC<CardProps> = ({ children, style, className, onClick,
       onClick={onClick}
       className={`premium-panel ${hoverable ? "btn-press" : ""} ${className || ""}`}
       style={{
-        padding: "20px",
+        padding: "24px",
+        borderRadius: "24px",
         cursor: onClick ? "pointer" : "default",
+        background: "var(--panel)",
+        border: "1px solid var(--border)",
+        boxShadow: "var(--shadow-md)",
         ...style,
       }}
       {...props}
@@ -71,11 +75,11 @@ export const Button: React.FC<ButtonProps> = ({
   const getSizeStyles = (): React.CSSProperties => {
     switch (size) {
       case "sm":
-        return { padding: "8px 12px", fontSize: "12px", borderRadius: "10px" };
+        return { padding: "10px 16px", fontSize: "12px", borderRadius: "12px" };
       case "md":
-        return { padding: "12px 20px", fontSize: "14px", borderRadius: "14px" };
+        return { padding: "14px 24px", fontSize: "14px", borderRadius: "16px" };
       case "lg":
-        return { padding: "16px 24px", fontSize: "16px", borderRadius: "18px" };
+        return { padding: "18px 32px", fontSize: "16px", borderRadius: "20px" };
       default:
         return {};
     }

@@ -8,6 +8,7 @@ interface SessionCardProps {
   losses: number;
   winrate: number;
   result: number;
+  onClick?: () => void;
 }
 
 export const SessionCard: React.FC<SessionCardProps> = ({
@@ -17,11 +18,16 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   losses,
   winrate,
   result,
+  onClick,
 }) => {
   const winrateColor = winrate > 55 ? "var(--green)" : winrate >= 45 ? "#facc15" : "var(--red)";
 
   return (
-    <Card style={{ padding: "18px", background: "var(--panel-soft)" }}>
+    <Card 
+      hoverable={!!onClick}
+      onClick={onClick}
+      style={{ padding: "18px", background: "var(--panel-soft)" }}
+    >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
         <div style={{ fontWeight: 800, fontSize: "14px", letterSpacing: "0.02em" }}>{session}</div>
         <Badge variant="soft" color="var(--muted)">{total} TRADES</Badge>

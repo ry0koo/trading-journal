@@ -111,6 +111,36 @@ button {
   transform: scale(0.97);
 }
 
+/* Glow Effect for main buttons */
+.glow-button {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.glow-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.1) 0%, transparent 80%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.glow-button:hover::before {
+  opacity: 1;
+}
+
+.glow-button:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.glow-button-primary:hover {
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+}
+
 /* ── Recharts customization ────────────────────────────────── */
 .recharts-tooltip-wrapper {
   outline: none !important;
