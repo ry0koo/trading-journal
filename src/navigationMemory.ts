@@ -1,4 +1,4 @@
-let stack: string[] = [];
+const stack: string[] = [];
 
 export function pushRoute(route: string) {
   if (stack[stack.length - 1] !== route) {

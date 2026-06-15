@@ -1,12 +1,13 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import type { ReactNode } from "react";
 import { pushRoute } from "./navigationMemory";
 import Home from "./pages/Home";
 import NewTrade from "./pages/NewTrade";
 import Statistics from "./pages/Statistics";
 import History from "./pages/History";
 
-function RouteTracker({ children }: any) {
+function RouteTracker({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   useEffect(() => {

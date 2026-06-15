@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 
+/* ─── Color palette ─────────────────────────────────────────── */
 export const colors = {
   bg: "#050505",
   panel: "#0e0e0e",
@@ -11,31 +12,35 @@ export const colors = {
   faint: "#646464",
   green: "#4ade80",
   red: "#ef4444",
-};
+} as const;
 
+/* ─── Border radii ──────────────────────────────────────────── */
 export const radii = {
   sm: 12,
   md: 16,
   lg: 20,
-};
+} as const;
 
+/* ─── Page layouts ──────────────────────────────────────────── */
 export const pageStyle: CSSProperties = {
   background: colors.bg,
-  minHeight: "100vh",
+  minHeight: "100dvh",
   color: colors.text,
-  padding: "20px 16px",
+  padding: "20px 16px 40px",
   maxWidth: "520px",
   margin: "0 auto",
-  paddingBottom: "32px",
 };
 
 export const widePageStyle: CSSProperties = {
-  ...pageStyle,
+  background: colors.bg,
+  minHeight: "100dvh",
+  color: colors.text,
+  padding: "24px 16px 48px",
   maxWidth: "920px",
-  padding: "24px 16px",
-  paddingBottom: "40px",
+  margin: "0 auto",
 };
 
+/* ─── Common layout primitives ──────────────────────────────── */
 export const headerStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
@@ -46,10 +51,10 @@ export const headerStyle: CSSProperties = {
 
 export const titleStyle: CSSProperties = {
   margin: 0,
-  fontSize: "44px",
+  fontSize: "clamp(32px, 9vw, 44px)",
   lineHeight: 0.95,
   fontWeight: 900,
-  letterSpacing: 0,
+  letterSpacing: "-0.01em",
 };
 
 export const sectionStyle: CSSProperties = {
@@ -57,31 +62,30 @@ export const sectionStyle: CSSProperties = {
   border: `1px solid ${colors.border}`,
   borderRadius: radii.lg,
   padding: "18px 20px",
-  transition: "all 0.2s ease",
 };
 
+/* ─── Form elements ─────────────────────────────────────────── */
 export const labelStyle: CSSProperties = {
   display: "block",
   marginBottom: "10px",
-  fontSize: "12px",
+  fontSize: "11px",
   color: colors.muted,
-  fontWeight: 700,
-  letterSpacing: "0.09em",
+  fontWeight: 800,
+  letterSpacing: "0.1em",
   textTransform: "uppercase",
 };
 
 export const inputStyle: CSSProperties = {
   width: "100%",
-  padding: "16px",
+  padding: "15px 16px",
   marginBottom: "16px",
   background: colors.panel,
   color: colors.text,
   border: `1px solid ${colors.border}`,
   borderRadius: radii.md,
   fontSize: "16px",
-  boxSizing: "border-box",
   outline: "none",
-  transition: "all 0.2s ease",
+  transition: "border-color 0.18s ease, background 0.18s ease",
 };
 
 export const selectStyle: CSSProperties = {
@@ -89,16 +93,18 @@ export const selectStyle: CSSProperties = {
   marginBottom: 0,
 };
 
+/* ─── Buttons ───────────────────────────────────────────────── */
 export const quietButtonStyle: CSSProperties = {
   background: colors.panel,
   border: `1px solid ${colors.border}`,
   color: colors.text,
-  padding: "12px 16px",
+  padding: "11px 16px",
   borderRadius: radii.sm,
   cursor: "pointer",
   fontWeight: 800,
   fontSize: "13px",
-  transition: "all 0.2s ease",
+  letterSpacing: "0.05em",
+  transition: "all 0.18s ease",
 };
 
 export const primaryButtonStyle: CSSProperties = {
@@ -110,10 +116,12 @@ export const primaryButtonStyle: CSSProperties = {
   borderRadius: radii.md,
   fontWeight: 900,
   fontSize: "15px",
+  letterSpacing: "0.05em",
   cursor: "pointer",
-  transition: "all 0.2s ease",
+  transition: "opacity 0.18s ease, transform 0.18s ease",
 };
 
+/* ─── Segmented controls ────────────────────────────────────── */
 export const segmentedRowStyle: CSSProperties = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr",
@@ -122,14 +130,16 @@ export const segmentedRowStyle: CSSProperties = {
 };
 
 export const segmentStyle: CSSProperties = {
-  padding: "15px",
+  padding: "13px",
   background: colors.panel,
   color: colors.text,
   border: `1px solid ${colors.border}`,
   borderRadius: radii.md,
   cursor: "pointer",
   fontWeight: 800,
-  fontSize: "14px",
+  fontSize: "13px",
+  letterSpacing: "0.04em",
+  transition: "all 0.15s ease",
 };
 
 export const activeSegmentStyle: CSSProperties = {
@@ -139,8 +149,9 @@ export const activeSegmentStyle: CSSProperties = {
   borderColor: colors.text,
 };
 
-export function resultColor(value: number) {
+/* ─── Utilities ─────────────────────────────────────────────── */
+export function resultColor(value: number): string {
   if (value > 0) return colors.green;
   if (value < 0) return colors.red;
-  return colors.text;
+  return colors.muted;
 }

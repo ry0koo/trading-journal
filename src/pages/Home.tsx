@@ -1,251 +1,170 @@
-import { useEffect, useState } from "react";
-import { usePageTransition } from "../hooks/usePageTransition";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
-import type { Trade } from "../types/trade";
-import {
-  colors,
-  pageStyle,
-  quietButtonStyle,
-  resultColor,
-} from "../ui";
+import { useTrades } from "../hooks/useTrades";
+import { PageWrapper } from "../components/PageWrapper";
+import { pageStyle } from "../ui";
+import { formatResultR, formatDateOnly, getTradeDate } from "../utils/dateUtils";
+import { Button, Card, Badge } from "../components/PremiumUI";
 
 function Home() {
-  
-  const animateIn = usePageTransition();
   const navigate = useNavigate();
-  const [trades, setTrades] = useState<Trade[]>(() => {
-  const cached = localStorage.getItem("trades_cache");
-  return cached ? JSON.parse(cached) : [];
-});
-  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
+  const { trades, loading } = useTrades();
 
-  const loadTrades = async () => {
-    const { data, error } = await supabase
-      .from("trades")
-      .select("*")
-      .order("created_at", { ascending: false });
+  const stats = useMemo(() => {
+    const total = trades.length;
+    const totalR = trades.reduce((s, t) => s + t.result, 0);
+    const wins = trades.filter((t) => t.result > 0).length;
+    const winRate = total === 0 ? 0 : Math.round((wins / total) * 100);
+    return { total, totalR, wins, winRate };
+  }, [trades]);
 
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    const formattedTrades: Trade[] =
-      data?.map((trade) => ({
-        id: trade.id,
-        instrument: trade.instrument,
-        direction: trade.direction,
-        result: Number(trade.result),
-        comment: trade.comment || "",
-        beforeImage: trade.before_image || "",
-        afterImage: trade.after_image || "",
-        createdAt: trade.created_at,
-      })) || [];
-
-    setTrades(formattedTrades);
-localStorage.setItem("trades_cache", JSON.stringify(formattedTrades));
-  };
-
-  useEffect(() => {
-    void Promise.resolve().then(loadTrades);
-
-    const channel = supabase
-      .channel("trades-home")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "trades",
-        },
-        () => {
-          loadTrades();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const totalTrades = trades.length;
-  const totalResult = trades.reduce((sum, trade) => sum + trade.result, 0);
-  const wins = trades.filter((trade) => trade.result > 0).length;
-  const winRate =
-    totalTrades === 0 ? 0 : Math.round((wins / totalTrades) * 100);
-  const tradeLabel = totalTrades === 1 ? "TRADE" : "TRADES";
+  const recentTrades = useMemo(() => {
+    return [...trades].slice(0, 3);
+  }, [trades]);
 
   return (
-    <main
-  style={{
-    ...pageStyle,
-    opacity: animateIn ? 1 : 0,
-    transform: animateIn ? "translateY(0)" : "translateY(12px)",
-    transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-  }}
->
-      <section
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "34px",
-        }}
-      >
-        <div>
+    <PageWrapper style={{ ...pageStyle, maxWidth: "480px" }}>
+      <section style={{ display: "flex", flexDirection: "column", gap: "40px", paddingTop: "20px" }}>
+
+        {/* Hero Section */}
+        <div style={{ textAlign: "center" }}>
           <h1
             style={{
-              margin: "12px 0 36px",
-              fontSize: "62px",
-              lineHeight: 0.9,
+              margin: "0 0 40px",
+              fontSize: "clamp(56px, 15vw, 80px)",
+              lineHeight: 0.85,
               fontWeight: 900,
-              letterSpacing: 0,
-              textAlign: "center",
+              letterSpacing: "-0.04em",
             }}
           >
             <span style={{ display: "block" }}>TRADING</span>
-            <span style={{ display: "block" }}>JOURNAL</span>
+            <span style={{ display: "block", color: "var(--text-secondary)" }}>JOURNAL</span>
           </h1>
 
           <div
             style={{
-              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "4px",
+              marginBottom: "32px"
             }}
           >
-            <div
+             <div style={labelStyle}>OVERALL PERFORMANCE</div>
+             <div
               style={{
-                color: colors.muted,
-                fontSize: "12px",
-                fontWeight: 800,
-                letterSpacing: "0.08em",
-                marginBottom: "12px",
-              }}
-            >
-              TOTAL RESULT
-            </div>
-
-            <div
-              style={{
-                fontSize: "74px",
+                fontSize: "clamp(64px, 18vw, 88px)",
                 fontWeight: 900,
-                lineHeight: 0.95,
-                color: resultColor(totalResult),
+                lineHeight: 1,
+                color: loading ? "var(--faint)" : (stats.totalR >= 0 ? "var(--green)" : "var(--red)"),
+                letterSpacing: "-0.03em",
+                transition: "all 0.4s ease",
               }}
             >
-              {formatResult(totalResult)}
+              {loading ? "···" : formatResultR(stats.totalR)}
             </div>
+          </div>
 
-            <div
-              style={{
-                marginTop: "24px",
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-              }}
-            >
-              <MiniMetric value={String(totalTrades)} label={tradeLabel} />
-              <MiniMetric value={`${winRate}%`} label="WR" />
-            </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <Card style={{ padding: "16px", textAlign: "left" }}>
+              <div style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1 }}>{loading ? "—" : stats.total}</div>
+              <div style={smallLabelStyle}>TOTAL TRADES</div>
+            </Card>
+            <Card style={{ padding: "16px", textAlign: "left" }}>
+              <div style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1 }}>{loading ? "—" : `${stats.winRate}%`}</div>
+              <div style={smallLabelStyle}>WIN RATE</div>
+            </Card>
           </div>
         </div>
 
-        <nav
-          style={{
-            display: "grid",
-            gap: "14px",
-            marginTop: "28px",
-          }}
-        >
-          <button
-            type="button"
-            style={{
-              ...quietButtonStyle,
-              padding: "20px",
-              background: hoveredButton === "new-trade" ? colors.panelSoft : colors.text,
-              color: hoveredButton === "new-trade" ? colors.text : "#000",
-              borderColor: hoveredButton === "new-trade" ? colors.borderStrong : colors.text,
-              fontSize: "15px",
-            }}
-            onMouseEnter={() => setHoveredButton("new-trade")}
-            onMouseLeave={() => setHoveredButton(null)}
+        {/* Quick Actions */}
+        <div style={{ display: "grid", gap: "12px" }}>
+          <Button
+            size="lg"
+            fullWidth
             onClick={() => navigate("/new-trade")}
+            style={{ fontSize: "16px", height: "64px" }}
           >
-            NEW TRADE
-          </button>
+            + NEW TRADE
+          </Button>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => navigate("/history")}
+              style={{ height: "56px" }}
+            >
+              HISTORY
+            </Button>
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => navigate("/statistics")}
+              style={{ height: "56px" }}
+            >
+              STATISTICS
+            </Button>
+          </div>
+        </div>
 
-          <button
-            type="button"
-            style={{
-              ...quietButtonStyle,
-              padding: "18px",
-              background: hoveredButton === "history" ? colors.panelSoft : colors.panel,
-              borderColor: hoveredButton === "history" ? colors.borderStrong : colors.border,
-            }}
-            onMouseEnter={() => setHoveredButton("history")}
-            onMouseLeave={() => setHoveredButton(null)}
-            onClick={() => navigate("/history")}
-          >
-            HISTORY
-          </button>
-
-          <button
-            type="button"
-            style={{
-              ...quietButtonStyle,
-              padding: "18px",
-              background: hoveredButton === "statistics" ? colors.panelSoft : colors.panel,
-              borderColor: hoveredButton === "statistics" ? colors.borderStrong : colors.border,
-            }}
-            onMouseEnter={() => setHoveredButton("statistics")}
-            onMouseLeave={() => setHoveredButton(null)}
-            onClick={() => navigate("/statistics")}
-          >
-            STATISTICS
-          </button>
-        </nav>
+        {/* Recent Activity */}
+        {recentTrades.length > 0 && (
+          <div>
+            <div style={{ ...labelStyle, marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span>RECENT ACTIVITY</span>
+              <button 
+                onClick={() => navigate("/history")}
+                style={{ fontSize: "11px", fontWeight: 800, color: "var(--muted)", textTransform: "uppercase" }}
+              >
+                VIEW ALL ›
+              </button>
+            </div>
+            <div style={{ display: "grid", gap: "10px" }}>
+              {recentTrades.map((trade) => (
+                <Card 
+                  key={trade.id} 
+                  hoverable 
+                  onClick={() => navigate(`/history?mode=all&type=trades`)}
+                  style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: "15px" }}>{trade.instrument}</div>
+                    <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>{formatDateOnly(getTradeDate(trade))}</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontWeight: 900, color: trade.result >= 0 ? "var(--green)" : "var(--red)" }}>
+                      {formatResultR(trade.result)}
+                    </div>
+                    <Badge color={trade.direction === "LONG" ? "var(--green)" : "var(--red)"} variant="soft">
+                      {trade.direction}
+                    </Badge>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
-    </main>
+    </PageWrapper>
   );
 }
 
-function MiniMetric({ value, label }: { value: string; label: string }) {
-  return (
-    <div
-      style={{
-        background: colors.panelSoft,
-        border: `1px solid ${colors.border}`,
-        borderRadius: 14,
-        padding: "14px",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "24px",
-          fontWeight: 900,
-          lineHeight: 1,
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          marginTop: "6px",
-          color: colors.muted,
-          fontSize: "11px",
-          fontWeight: 800,
-          letterSpacing: "0.08em",
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
+const labelStyle: React.CSSProperties = {
+  fontSize: "11px",
+  color: "var(--muted)",
+  fontWeight: 800,
+  letterSpacing: "0.15em",
+  textTransform: "uppercase",
+};
 
-function formatResult(value: number) {
-  const text = Number.isInteger(value) ? String(value) : value.toFixed(1);
-  return `${value >= 0 ? "+" : ""}${text}R`;
-}
+const smallLabelStyle: React.CSSProperties = {
+  marginTop: "6px",
+  color: "var(--muted)",
+  fontSize: "10px",
+  fontWeight: 800,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
+};
 
 export default Home;

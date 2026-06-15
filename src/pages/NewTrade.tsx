@@ -1,225 +1,135 @@
 import { useState, useEffect } from "react";
-import { usePageTransition } from "../hooks/usePageTransition";
-import { popRoute } from "../navigationMemory";
-import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { BackButton } from "../components/BackButton";
+import { PageWrapper } from "../components/PageWrapper";
 import {
-  activeSegmentStyle,
-  colors,
   headerStyle,
   inputStyle,
   labelStyle,
   pageStyle,
-  primaryButtonStyle,
-  quietButtonStyle,
-  radii,
-  sectionStyle,
-  segmentStyle,
-  segmentedRowStyle,
   selectStyle,
   titleStyle,
 } from "../ui";
-import {
-  getTodayInputValue,
-  tradeDateToIso,
-} from "../utils/dateUtils";
-
-type ScreenshotType = "before" | "after";
+import { getTodayInputValue, tradeDateToIso } from "../utils/dateUtils";
+import { Button, Card } from "../components/PremiumUI";
+import { ScreenshotUpload } from "../components/ScreenshotUpload";
 
 function NewTrade() {
-  
-  const animateIn = usePageTransition();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [resultFocused, setResultFocused] = useState(false);
-  const [backHovered, setBackHovered] = useState(false);
 
-const editId = searchParams.get("edit");
-const isEditMode = !!editId;
+  const editId = searchParams.get("edit");
+  const isEditMode = !!editId;
 
-const [instrument, setInstrument] = useState<"EURUSD" | "GBPUSD">("EURUSD");
-const [tradeDate, setTradeDate] = useState(getTodayInputValue());
-const [session, setSession] = useState("London");
-const [direction, setDirection] = useState<"LONG" | "SHORT">("LONG");
-const [result, setResult] = useState("");
-const [comment, setComment] = useState("");
-const [beforeImage, setBeforeImage] = useState("");
-const [afterImage, setAfterImage] = useState("");
-const [isSaving, setIsSaving] = useState(false);
+  const [instrument, setInstrument] = useState<"EURUSD" | "GBPUSD">("EURUSD");
+  const [tradeDate, setTradeDate] = useState(getTodayInputValue());
+  const [session, setSession] = useState("London");
+  const [direction, setDirection] = useState<"LONG" | "SHORT">("LONG");
+  const [result, setResult] = useState("");
+  const [comment, setComment] = useState("");
+  const [beforeImage, setBeforeImage] = useState("");
+  const [afterImage, setAfterImage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-useEffect(() => {
-  window.scrollTo(0, 0);
-}, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-useEffect(() => {
-  if (!editId) return;
+  useEffect(() => {
+    if (!editId) return;
 
-  const loadTrade = async () => {
-    const { data, error } = await supabase
-      .from("trades")
-      .select("*")
-      .eq("id", editId)
-      .single();
+    const loadTrade = async () => {
+      const { data, error } = await supabase
+        .from("trades")
+        .select("*")
+        .eq("id", editId)
+        .single();
 
-    if (error || !data) return;
+      if (error || !data) return;
 
-    setInstrument(data.instrument);
-    setDirection(data.direction);
-    setSession(data.session || "");
-    setTradeDate(data.trade_date || getTodayInputValue());
-    setResult(String(data.result));
-    setComment(data.comment || "");
-    setBeforeImage(data.before_image || "");
-    setAfterImage(data.after_image || "");
-  };
-
-  loadTrade();
-}, [editId]);
-
-  const readFileToDataUrl = (file: File, type: ScreenshotType) => {
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      const image = reader.result as string;
-
-      if (type === "before") {
-        setBeforeImage(image);
-      } else {
-        setAfterImage(image);
-      }
+      setInstrument(data.instrument);
+      setDirection(data.direction);
+      setSession(data.session || "London");
+      setTradeDate(data.trade_date || getTodayInputValue());
+      setResult(String(data.result));
+      setComment(data.comment || "");
+      setBeforeImage(data.before_image || "");
+      setAfterImage(data.after_image || "");
     };
 
+    void loadTrade();
+  }, [editId]);
+
+  const handleImageFile = (file: File, type: "before" | "after") => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const image = reader.result as string;
+      if (type === "before") setBeforeImage(image);
+      else setAfterImage(image);
+    };
     reader.readAsDataURL(file);
   };
 
-  const handleFileChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    type: ScreenshotType
-  ) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    readFileToDataUrl(file, type);
-    e.target.value = "";
-  };
-
-  const handlePaste = (
-    e: ClipboardEvent<HTMLDivElement>,
-    type: ScreenshotType
-  ) => {
-    const items = Array.from(e.clipboardData.items);
-    const imageItem = items.find((item) => item.type.startsWith("image"));
-
-    if (!imageItem) return;
-
-    const file = imageItem.getAsFile();
-    if (!file) return;
-
-    e.preventDefault();
-    readFileToDataUrl(file, type);
-  };
-
   const saveTrade = async () => {
-  if (!result.trim()) return;
+    if (!result.trim()) return;
 
-  setIsSaving(true);
+    setIsSaving(true);
+    setSaveError(null);
 
-  const payload = {
-    instrument,
-    direction,
-    result: Number(result.replace(",", ".")),
-    session,
-    trade_date: tradeDate,
-    comment,
-    before_image: beforeImage,
-    after_image: afterImage,
-  };
+    const payload = {
+      instrument,
+      direction,
+      result: Number(result.replace(",", ".")),
+      session,
+      trade_date: tradeDate,
+      comment,
+      before_image: beforeImage,
+      after_image: afterImage,
+    };
 
-  try {
-    if (isEditMode) {
-      const { error } = await supabase
-        .from("trades")
-        .update(payload)
-        .eq("id", editId);
+    try {
+      if (isEditMode) {
+        const { error } = await supabase
+          .from("trades")
+          .update(payload)
+          .eq("id", editId);
 
-      if (error) {
-        console.error(error);
-        alert("Error updating trade");
-        setIsSaving(false);
-        return;
-      }
-    } else {
-      const { error } = await supabase
-        .from("trades")
-        .insert([
-          {
-            ...payload,
-            created_at: tradeDateToIso(tradeDate),
-          },
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("trades").insert([
+          { ...payload, created_at: tradeDateToIso(tradeDate) },
         ]);
 
-      if (error) {
-        console.error(error);
-        alert("Error saving trade");
-        setIsSaving(false);
-        return;
+        if (error) throw error;
       }
+
+      navigate("/history");
+    } catch {
+      setSaveError("Failed to save. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
+  };
 
-    navigate("/history");
-  } finally {
-    setIsSaving(false);
-  }
-};
-
-  const canSave = result.trim() !== "" && !Number.isNaN(Number(result.replace(",", ".")));
+  const canSave =
+    result.trim() !== "" && !Number.isNaN(Number(result.replace(",", ".")));
 
   return (
-    <main
-  style={{
-    ...pageStyle,
-    opacity: animateIn ? 1 : 0,
-    transform: animateIn ? "translateY(0)" : "translateY(12px)",
-    transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-  }}
->
-      <header style={headerStyle}>
-        <button
-          type="button"
-          onClick={() => {
-  const prev = popRoute();
-
-  if (prev) {
-    navigate(prev);
-  } else {
-    navigate("/");
-  }
-}}
-          onMouseEnter={() => setBackHovered(true)}
-          onMouseLeave={() => setBackHovered(false)}
-          style={{
-            ...quietButtonStyle,
-            borderColor: backHovered ? colors.borderStrong : colors.border,
-            background: backHovered ? colors.panelSoft : colors.panel,
-          }}
-        >
-          BACK
-        </button>
-        <h1 style={titleStyle}>
-  {isEditMode ? "EDIT TRADE" : "NEW TRADE"}
-</h1>
+    <PageWrapper style={{ ...pageStyle, maxWidth: "520px" }}>
+      <header style={{ ...headerStyle, marginBottom: "32px" }}>
+        <BackButton />
+        <h1 style={{ ...titleStyle, fontSize: "40px" }}>{isEditMode ? "EDIT" : "NEW"} TRADE</h1>
       </header>
 
-      <section style={{ ...sectionStyle, marginBottom: "14px" }}>
-        <div style={twoColumnStyle}>
+      <Card style={{ marginBottom: "16px", padding: "24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
           <Field label="Instrument">
             <select
               value={instrument}
-              onChange={(e) =>
-                setInstrument(e.target.value as "EURUSD" | "GBPUSD")
-              }
+              onChange={(e) => setInstrument(e.target.value as "EURUSD" | "GBPUSD")}
               style={selectStyle}
             >
               <option value="EURUSD">EURUSD</option>
@@ -227,7 +137,7 @@ useEffect(() => {
             </select>
           </Field>
 
-          <Field label="Trade Date">
+          <Field label="Date">
             <input
               type="date"
               value={tradeDate}
@@ -241,7 +151,7 @@ useEffect(() => {
           <select
             value={session}
             onChange={(e) => setSession(e.target.value)}
-            style={selectStyle}
+            style={{ ...selectStyle, marginBottom: "20px" }}
           >
             <option value="Tokyo">Tokyo</option>
             <option value="London">London</option>
@@ -250,241 +160,139 @@ useEffect(() => {
           </select>
         </Field>
 
-        <label style={labelStyle}>Direction</label>
-        <div style={segmentedRowStyle}>
-          <button
-            type="button"
-            style={direction === "LONG" ? activeSegmentStyle : segmentStyle}
+        <label style={{ ...labelStyle, marginBottom: "12px" }}>Direction</label>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "24px" }}>
+          <DirectionButton 
+            active={direction === "LONG"} 
             onClick={() => setDirection("LONG")}
-          >
-            LONG
-          </button>
-
-          <button
-            type="button"
-            style={direction === "SHORT" ? activeSegmentStyle : segmentStyle}
+            label="LONG"
+            activeColor="var(--green)"
+          />
+          <DirectionButton 
+            active={direction === "SHORT"} 
             onClick={() => setDirection("SHORT")}
-          >
-            SHORT
-          </button>
+            label="SHORT"
+            activeColor="var(--red)"
+          />
         </div>
 
-        <label style={labelStyle}>Result (R)</label>
+        <label style={{ ...labelStyle, textAlign: "center", marginBottom: "12px" }}>RESULT (R)</label>
         <input
           type="text"
           inputMode="decimal"
-          step="0.1"
           placeholder="0.0"
           value={result}
-          onChange={(e) => {
-  const value = e.target.value.replace(",", ".");
-  setResult(value);
-}}
+          onChange={(e) => setResult(e.target.value.replace(",", "."))}
           onFocus={() => setResultFocused(true)}
           onBlur={() => setResultFocused(false)}
           style={{
             ...inputStyle,
             marginBottom: 0,
-            fontSize: "36px",
+            fontSize: "48px",
             fontWeight: 900,
             lineHeight: 1,
             textAlign: "center",
-            borderColor: resultFocused ? colors.text : colors.border,
-            background: resultFocused ? colors.panelSoft : colors.panel,
+            height: "100px",
+            borderColor: resultFocused ? "var(--text)" : "var(--border)",
+            background: resultFocused ? "var(--panel-soft)" : "var(--panel)",
+            color: Number(result) >= 0 ? "var(--green)" : "var(--red)",
+            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         />
-      </section>
+      </Card>
 
-      <section style={{ ...sectionStyle, marginBottom: "14px" }}>
-        <label style={labelStyle}>Comment</label>
+      <Card style={{ marginBottom: "16px", padding: "20px" }}>
+        <label style={{ ...labelStyle, marginBottom: "12px" }}>ANALYSIS & NOTES</label>
         <textarea
-          placeholder="Comment"
+          placeholder="What did you see? What did you feel? What did you learn?"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           style={{
             ...inputStyle,
-            height: "112px",
+            height: "140px",
             marginBottom: 0,
-            resize: "vertical",
+            resize: "none",
+            fontSize: "15px",
+            lineHeight: 1.6,
           }}
         />
-      </section>
+      </Card>
 
-      <div style={{ display: "grid", gap: "14px" }}>
-        <ScreenshotBlock
-          title="BEFORE"
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "24px" }}>
+        <ScreenshotUpload
+          title="Before"
           image={beforeImage}
-          onPaste={(e) => handlePaste(e, "before")}
-          onFileChange={(e) => handleFileChange(e, "before")}
+          onClear={() => setBeforeImage("")}
+          onFileChange={(file) => handleImageFile(file, "before")}
         />
-
-        <ScreenshotBlock
-          title="AFTER"
+        <ScreenshotUpload
+          title="After"
           image={afterImage}
-          onPaste={(e) => handlePaste(e, "after")}
-          onFileChange={(e) => handleFileChange(e, "after")}
+          onClear={() => setAfterImage("")}
+          onFileChange={(file) => handleImageFile(file, "after")}
         />
       </div>
 
-      <div
-        style={{
-          marginTop: "18px",
-        }}
-      >
-        <button
-          type="button"
-          disabled={!canSave || isSaving}
+      {saveError && (
+        <div
           style={{
-            ...primaryButtonStyle,
-            opacity: canSave && !isSaving ? 1 : 0.45,
-            cursor: canSave && !isSaving ? "pointer" : "not-allowed",
+            marginBottom: "16px",
+            padding: "16px",
+            background: "var(--red-soft)",
+            border: "1px solid rgba(239, 68, 68, 0.2)",
+            borderRadius: "14px",
+            color: "var(--red)",
+            fontSize: "14px",
+            fontWeight: 700,
+            textAlign: "center",
           }}
-          onClick={saveTrade}
         >
-          {isSaving ? "SAVING..." : isEditMode ? "SAVE CHANGES" : "SAVE TRADE"}
-        </button>
-      </div>
-    </main>
+          {saveError}
+        </div>
+      )}
+
+      <Button
+        disabled={!canSave || isSaving}
+        size="lg"
+        fullWidth
+        onClick={saveTrade}
+        style={{ height: "64px", fontSize: "16px" }}
+      >
+        {isSaving ? "SAVING…" : isEditMode ? "SAVE CHANGES" : "SAVE TRADE"}
+      </Button>
+    </PageWrapper>
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: "16px" }}>
-      <label style={labelStyle}>{label}</label>
+    <div>
+      <label style={{ ...labelStyle, marginBottom: "8px" }}>{label}</label>
       {children}
     </div>
   );
 }
 
-function ScreenshotBlock({
-  title,
-  image,
-  onPaste,
-  onFileChange,
-}: {
-  title: string;
-  image: string;
-  onPaste: (e: ClipboardEvent<HTMLDivElement>) => void;
-  onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
-}) {
-  const [isDragOver, setIsDragOver] = useState(false);
-
+function DirectionButton({ active, onClick, label, activeColor }: { active: boolean, onClick: () => void, label: string, activeColor: string }) {
   return (
-    <section
-      tabIndex={0}
-      onPaste={onPaste}
-      onClick={(e) => e.currentTarget.focus()}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setIsDragOver(true);
+    <button
+      type="button"
+      onClick={onClick}
+      className="btn-press"
+      style={{
+        padding: "16px",
+        borderRadius: "14px",
+        background: active ? activeColor : "var(--panel)",
+        color: active ? "#000" : "var(--muted)",
+        border: active ? `1px solid ${activeColor}` : "1px solid var(--border)",
+        fontWeight: 900,
+        fontSize: "13px",
+        letterSpacing: "0.05em",
       }}
-      onDragLeave={() => setIsDragOver(false)}
-      onDrop={(e) => {
-        e.preventDefault();
-        setIsDragOver(false);
-        const file = e.dataTransfer.files?.[0];
-        if (file && file.type.startsWith("image")) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const event = {
-              target: { files: [file] },
-            } as unknown as ChangeEvent<HTMLInputElement>;
-            onFileChange(event);
-          };
-          reader.readAsDataURL(file);
-        }
-      }}
-      style={sectionStyle}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "12px",
-          marginBottom: "12px",
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: "13px",
-            fontWeight: 900,
-            letterSpacing: "0.08em",
-          }}
-        >
-          {title}
-        </h2>
-      </div>
-
-      <div
-        style={{
-          minHeight: "136px",
-          border: `1px dashed ${isDragOver ? colors.text : colors.borderStrong}`,
-          borderRadius: radii.md,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          background: isDragOver ? colors.panelSoft : colors.bg,
-          transition: "all 0.2s ease",
-        }}
-      >
-        {image ? (
-          <img src={image} alt="" style={previewStyle} />
-        ) : (
-          <div
-            style={{
-              color: colors.faint,
-              fontSize: "12px",
-              fontWeight: 600,
-              letterSpacing: "0.04em",
-              textAlign: "center",
-              padding: "16px",
-            }}
-          >
-            {isDragOver ? "DROP IMAGE HERE" : "PASTE OR DRAG IMAGE"}
-          </div>
-        )}
-      </div>
-
-      <label
-        style={{
-          ...quietButtonStyle,
-          display: "inline-flex",
-          marginTop: "12px",
-          fontSize: "12px",
-          padding: "10px 12px",
-        }}
-      >
-        CHOOSE FILE
-        <input
-          type="file"
-          accept="image/*"
-          onChange={onFileChange}
-          style={{ display: "none" }}
-        />
-      </label>
-    </section>
+      {label}
+    </button>
   );
 }
 
-const twoColumnStyle: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: "12px",
-};
-
-const previewStyle: CSSProperties = {
-  width: "100%",
-  display: "block",
-};
-// temp fix
 export default NewTrade;
