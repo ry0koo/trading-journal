@@ -135,6 +135,13 @@ useEffect(() => {
   const activeQuarter = Number(searchParams.get("quarter"));
   const activeWeekStart = searchParams.get("weekStart");
   const activeDay = searchParams.get("day");
+  const activeDayLabel = activeDay
+  ? new Date(activeDay).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).toUpperCase()
+  : null;
 
   const weeksForActiveYear = useMemo(
     () => buildWeeksForYear(trades, activeYear),
@@ -517,16 +524,45 @@ transition:
     </section>
 
     <div
+  style={{
+    opacity: 0.85,
+    marginBottom: "20px",
+  }}
+>
+  {activeDay ? (
+    <>
+      <div
+        style={{
+          fontSize: "22px",
+          fontWeight: 800,
+          marginBottom: "4px",
+        }}
+      >
+        {activeDayLabel}
+      </div>
+
+      <div
+        style={{
+          opacity: 0.6,
+          fontSize: "16px",
+          fontWeight: 600,
+        }}
+      >
+        {filteredTrades.length} {countLabel}
+      </div>
+    </>
+  ) : (
+    <div
       style={{
         opacity: 0.6,
-        marginBottom: "20px",
         fontSize: "18px",
         fontWeight: 600,
-        letterSpacing: 0,
       }}
     >
       {filteredTrades.length} {countLabel}
     </div>
+  )}
+</div>
 
       {filteredTrades.length === 0 && (
         <div
