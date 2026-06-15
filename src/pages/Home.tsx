@@ -82,7 +82,7 @@ function Home() {
             size="lg"
             fullWidth
             onClick={() => navigate("/new-trade")}
-            className="glow-button glow-button-primary"
+            className="glow-inverted"
             style={{ fontSize: "16px", height: "64px", textTransform: "uppercase" }}
           >
             + NEW TRADE

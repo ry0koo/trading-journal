@@ -13,6 +13,7 @@ export const StatCard: React.FC<StatCardProps> = ({ value, label, color = "var(-
     <Card
       hoverable={!!onClick}
       onClick={onClick}
+      className={onClick ? "glow-button" : ""}
       style={{
         minHeight: "120px",
         display: "flex",

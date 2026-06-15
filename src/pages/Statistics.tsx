@@ -193,7 +193,10 @@ function Statistics() {
       />
 
       {/* Hero Stats */}
-      <Card style={{ marginBottom: "16px", padding: "40px 32px", textAlign: "center" }}>
+      <Card 
+        className="glow-button"
+        style={{ marginBottom: "16px", padding: "40px 32px", textAlign: "center" }}
+      >
         <div style={sectionLabelStyle}>TOTAL PERFORMANCE</div>
         <div
           style={{

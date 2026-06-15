@@ -26,6 +26,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
     <Card 
       hoverable={!!onClick}
       onClick={onClick}
+      className={onClick ? "glow-button" : ""}
       style={{ padding: "18px", background: "var(--panel-soft)" }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>

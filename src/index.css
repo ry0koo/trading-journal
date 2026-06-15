@@ -111,7 +111,7 @@ button {
   transform: scale(0.97);
 }
 
-/* Glow Effect for main buttons */
+/* Glow Effect for main buttons and cards */
 .glow-button {
   position: relative;
   overflow: hidden;
@@ -122,7 +122,7 @@ button {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.1) 0%, transparent 80%);
+  background: radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: -1;
@@ -133,12 +133,38 @@ button {
 }
 
 .glow-button:hover {
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
 .glow-button-primary:hover {
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
+}
+
+/* Inverted Glow for white buttons (Dark Aura) */
+.glow-inverted {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.glow-inverted::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.glow-inverted:hover::before {
+  opacity: 1;
+}
+
+.glow-inverted:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
 }
 
 /* ── Recharts customization ────────────────────────────────── */
