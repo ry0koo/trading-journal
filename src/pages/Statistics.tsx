@@ -70,8 +70,8 @@ function Statistics() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedQuarter, setSelectedQuarter] = useState(1);
   const [selectedWeek, setSelectedWeek] = useState(0);
-  const [isChartOpen, setIsChartOpen] = useState(false);
 
+  
   const loadTrades = async () => {
   const { data, error } = await supabase
     .from("trades")
@@ -535,9 +535,8 @@ console.table(equityCurveData);
   >
     EQUITY CURVE
   </div>
+<div
 
-  <div
-  onClick={() => setIsChartOpen(true)}
   style={{
     width: "100%",
     height: "260px",
@@ -632,55 +631,7 @@ console.table(equityCurveData);
   </div>
       </section>
 
-      {isChartOpen && (
-  <div
-    style={{
-      position: "fixed",
-      inset: 0,
-      background: "rgba(0,0,0,0.92)",
-      zIndex: 9999,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-    onClick={() => setIsChartOpen(false)}
-  >
-    {/* КРЕСТИК */}
-    <div
-      onClick={(e) => e.stopPropagation()}
-      style={{
-        position: "absolute",
-        top: "20px",
-        right: "20px",
-        fontSize: "28px",
-        color: "#fff",
-        cursor: "pointer",
-        fontWeight: 700,
-      }}
-      onClickCapture={() => setIsChartOpen(false)}
-    >
-      ✕
-    </div>
 
-    {/* ГРАФИК */}
-    <div
-      onClick={(e) => e.stopPropagation()}
-      style={{
-        width: "95vw",
-        height: "85vh",
-      }}
-    >
-      <EquityChart
-  data={equityCurveData}
-  onPointClick={(point) => {
-    setIsChartOpen(false);
-
-    navigate(`/history?day=${point.dayKey}`);
-  }}
-/>
-    </div>
-  </div>
-)}
     </main>
   );
 }
