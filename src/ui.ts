@@ -2,13 +2,13 @@ import type { CSSProperties } from "react";
 
 export const colors = {
   bg: "#050505",
-  panel: "#0f0f0f",
-  panelSoft: "#141414",
-  border: "#242424",
-  borderStrong: "#343434",
+  panel: "#0e0e0e",
+  panelSoft: "#151515",
+  border: "#252525",
+  borderStrong: "#353535",
   text: "#ffffff",
-  muted: "#8b8b8b",
-  faint: "#5f5f5f",
+  muted: "#8d8d8d",
+  faint: "#646464",
   green: "#4ade80",
   red: "#ef4444",
 };
@@ -23,14 +23,17 @@ export const pageStyle: CSSProperties = {
   background: colors.bg,
   minHeight: "100vh",
   color: colors.text,
-  padding: "24px",
+  padding: "20px 16px",
   maxWidth: "520px",
   margin: "0 auto",
+  paddingBottom: "32px",
 };
 
 export const widePageStyle: CSSProperties = {
   ...pageStyle,
-  maxWidth: "860px",
+  maxWidth: "920px",
+  padding: "24px 16px",
+  paddingBottom: "40px",
 };
 
 export const headerStyle: CSSProperties = {
@@ -53,16 +56,17 @@ export const sectionStyle: CSSProperties = {
   background: colors.panel,
   border: `1px solid ${colors.border}`,
   borderRadius: radii.lg,
-  padding: "18px",
+  padding: "18px 20px",
+  transition: "all 0.2s ease",
 };
 
 export const labelStyle: CSSProperties = {
   display: "block",
-  marginBottom: "8px",
+  marginBottom: "10px",
   fontSize: "12px",
   color: colors.muted,
   fontWeight: 700,
-  letterSpacing: "0.08em",
+  letterSpacing: "0.09em",
   textTransform: "uppercase",
 };
 
@@ -77,6 +81,7 @@ export const inputStyle: CSSProperties = {
   fontSize: "16px",
   boxSizing: "border-box",
   outline: "none",
+  transition: "all 0.2s ease",
 };
 
 export const selectStyle: CSSProperties = {
@@ -93,6 +98,7 @@ export const quietButtonStyle: CSSProperties = {
   cursor: "pointer",
   fontWeight: 800,
   fontSize: "13px",
+  transition: "all 0.2s ease",
 };
 
 export const primaryButtonStyle: CSSProperties = {
@@ -105,6 +111,7 @@ export const primaryButtonStyle: CSSProperties = {
   fontWeight: 900,
   fontSize: "15px",
   cursor: "pointer",
+  transition: "all 0.2s ease",
 };
 
 export const segmentedRowStyle: CSSProperties = {

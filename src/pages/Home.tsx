@@ -18,6 +18,7 @@ function Home() {
   const cached = localStorage.getItem("trades_cache");
   return cached ? JSON.parse(cached) : [];
 });
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
 
   const loadTrades = async () => {
     const { data, error } = await supabase
@@ -79,14 +80,10 @@ localStorage.setItem("trades_cache", JSON.stringify(formattedTrades));
   return (
     <main
   style={{
-    ...pageStyle, // или pageStyle в других файлах
+    ...pageStyle,
     opacity: animateIn ? 1 : 0,
-    transform: animateIn
-  ? "translateY(0)"
-  : "translateY(16px)",
-
-transition:
-  "opacity 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
+    transform: animateIn ? "translateY(0)" : "translateY(12px)",
+    transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
   }}
 >
       <section
@@ -156,8 +153,8 @@ transition:
         <nav
           style={{
             display: "grid",
-            gap: "12px",
-            marginTop: "18px",
+            gap: "14px",
+            marginTop: "28px",
           }}
         >
           <button
@@ -165,11 +162,13 @@ transition:
             style={{
               ...quietButtonStyle,
               padding: "20px",
-              background: colors.text,
-              color: "#000",
-              borderColor: colors.text,
+              background: hoveredButton === "new-trade" ? colors.panelSoft : colors.text,
+              color: hoveredButton === "new-trade" ? colors.text : "#000",
+              borderColor: hoveredButton === "new-trade" ? colors.borderStrong : colors.text,
               fontSize: "15px",
             }}
+            onMouseEnter={() => setHoveredButton("new-trade")}
+            onMouseLeave={() => setHoveredButton(null)}
             onClick={() => navigate("/new-trade")}
           >
             NEW TRADE
@@ -177,7 +176,14 @@ transition:
 
           <button
             type="button"
-            style={{ ...quietButtonStyle, padding: "18px" }}
+            style={{
+              ...quietButtonStyle,
+              padding: "18px",
+              background: hoveredButton === "history" ? colors.panelSoft : colors.panel,
+              borderColor: hoveredButton === "history" ? colors.borderStrong : colors.border,
+            }}
+            onMouseEnter={() => setHoveredButton("history")}
+            onMouseLeave={() => setHoveredButton(null)}
             onClick={() => navigate("/history")}
           >
             HISTORY
@@ -185,7 +191,14 @@ transition:
 
           <button
             type="button"
-            style={{ ...quietButtonStyle, padding: "18px" }}
+            style={{
+              ...quietButtonStyle,
+              padding: "18px",
+              background: hoveredButton === "statistics" ? colors.panelSoft : colors.panel,
+              borderColor: hoveredButton === "statistics" ? colors.borderStrong : colors.border,
+            }}
+            onMouseEnter={() => setHoveredButton("statistics")}
+            onMouseLeave={() => setHoveredButton(null)}
             onClick={() => navigate("/statistics")}
           >
             STATISTICS

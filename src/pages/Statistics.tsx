@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, memo } from "react";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { popRoute } from "../navigationMemory";
 import {
@@ -27,6 +27,12 @@ import {
   titleStyle,
   widePageStyle,
 } from "../ui";
+import {
+  formatLocalDateKey,
+  formatResultR,
+  getTradeDate,
+  type TradingWeek,
+} from "../utils/dateUtils";
 
 type Mode = "week" | "month" | "quarter" | "year" | "all";
 type HistoryType = "trades" | "wins" | "losses";
@@ -46,12 +52,6 @@ const MONTHS = [
   "DECEMBER",
 ];
 
-type TradingWeek = {
-  monday: Date;
-  friday: Date;
-  key: string;
-};
-
 type StatsTrade = Trade & {
   tradeDate?: string;
   session?: string;
@@ -61,6 +61,7 @@ function Statistics() {
   
   const animateIn = usePageTransition();
   const navigate = useNavigate();
+  const [backHovered, setBackHovered] = useState(false);
   const [trades, setTrades] = useState<StatsTrade[]>(() => {
   const cached = localStorage.getItem("stats_cache");
   return cached ? JSON.parse(cached) : [];
@@ -293,8 +294,7 @@ function Statistics() {
 
   return Array.from(byDay.values());
 }, [filteredTrades]);
-console.log("EQUITY DATA");
-console.table(equityCurveData);
+
   const winRate =
     totalTrades === 0 ? 0 : Math.round((wins.length / totalTrades) * 100);
 
@@ -371,10 +371,9 @@ console.table(equityCurveData);
     width: "100%",
     maxWidth: "100%",
     overflowX: "hidden",
-
     opacity: animateIn ? 1 : 0,
-    transform: animateIn ? "translateY(0)" : "translateY(16px)",
-    transition: "all 0.3s ease",
+    transform: animateIn ? "translateY(0)" : "translateY(12px)",
+    transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
   }}
 >
       <header style={headerStyle}>
@@ -389,7 +388,13 @@ console.table(equityCurveData);
     navigate("/");
   }
 }}
-          style={quietButtonStyle}
+          onMouseEnter={() => setBackHovered(true)}
+          onMouseLeave={() => setBackHovered(false)}
+          style={{
+            ...quietButtonStyle,
+            borderColor: backHovered ? colors.borderStrong : colors.border,
+            background: backHovered ? colors.panelSoft : colors.panel,
+          }}
         >
           BACK
         </button>
@@ -398,27 +403,27 @@ console.table(equityCurveData);
 
       <section style={{ ...sectionStyle, marginBottom: "14px" }}>
         <div style={periodGridStyle}>
-          <PeriodButton active={mode === "week"} onClick={() => setMode("week")}>
+          <MemoizedPeriodButton active={mode === "week"} onClick={() => setMode("week")}>
             WEEK
-          </PeriodButton>
-          <PeriodButton
+          </MemoizedPeriodButton>
+          <MemoizedPeriodButton
             active={mode === "month"}
             onClick={() => setMode("month")}
           >
             MONTH
-          </PeriodButton>
-          <PeriodButton
+          </MemoizedPeriodButton>
+          <MemoizedPeriodButton
             active={mode === "quarter"}
             onClick={() => setMode("quarter")}
           >
             QUARTER
-          </PeriodButton>
-          <PeriodButton active={mode === "year"} onClick={() => setMode("year")}>
+          </MemoizedPeriodButton>
+          <MemoizedPeriodButton active={mode === "year"} onClick={() => setMode("year")}>
             YEAR
-          </PeriodButton>
-          <PeriodButton active={mode === "all"} onClick={() => setMode("all")}>
+          </MemoizedPeriodButton>
+          <MemoizedPeriodButton active={mode === "all"} onClick={() => setMode("all")}>
             ALL
-          </PeriodButton>
+          </MemoizedPeriodButton>
         </div>
 
         {mode !== "all" && (
@@ -555,17 +560,17 @@ console.table(equityCurveData);
 </section>
 
       <section style={statsGridStyle}>
-        <StatCard
+        <MemoizedStatCard
           value={String(totalTrades)}
           label="TRADES"
           onClick={() => openHistory("trades")}/>
-        <StatCard value={`${winRate}%`} label="WIN RATE" />
-        <StatCard
+        <MemoizedStatCard value={`${winRate}%`} label="WIN RATE" />
+        <MemoizedStatCard
           value={String(wins.length)}
           label="WINS"
           color={colors.green}
           onClick={() => openHistory("wins")}/>
-        <StatCard
+        <MemoizedStatCard
           value={String(losses.length)}
           label="LOSSES"
           color={colors.red}
@@ -636,32 +641,6 @@ console.table(equityCurveData);
   );
 }
 
-function getTradeDate(trade: StatsTrade) {
-  const source = trade.tradeDate || trade.createdAt;
-  const date = new Date(source);
-
-  if (Number.isNaN(date.getTime())) {
-    return new Date(trade.createdAt);
-  }
-
-  return date;
-}
-
-function formatResultR(value: number) {
-  const rounded = Math.round(value * 100) / 100;
-  const text = Number.isInteger(rounded)
-    ? String(rounded)
-    : rounded.toFixed(2).replace(/\.?0+$/, "");
-  return `${rounded >= 0 ? "+" : ""}${text}R`;
-}
-
-function formatLocalDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function PeriodButton({
   active,
   onClick,
@@ -681,6 +660,8 @@ function PeriodButton({
     </button>
   );
 }
+
+const MemoizedPeriodButton = memo(PeriodButton);
 
 function StatCard({
   value,
@@ -747,6 +728,8 @@ function StatCard({
     </button>
   );
 }
+
+const MemoizedStatCard = memo(StatCard);
 
 const periodGridStyle: CSSProperties = {
   display: "grid",

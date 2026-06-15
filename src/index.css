@@ -37,10 +37,35 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0px);
+}
+
+button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
 #root {
   width: 100%;
   min-height: 100svh;
 }
+
 html {
   scrollbar-gutter: stable;
 }

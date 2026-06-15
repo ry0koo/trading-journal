@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { popRoute } from "../navigationMemory";
 import type { ChangeEvent, ClipboardEvent, CSSProperties } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import {
   activeSegmentStyle,
@@ -21,6 +20,10 @@ import {
   selectStyle,
   titleStyle,
 } from "../ui";
+import {
+  getTodayInputValue,
+  tradeDateToIso,
+} from "../utils/dateUtils";
 
 type ScreenshotType = "before" | "after";
 
@@ -29,19 +32,27 @@ function NewTrade() {
   const animateIn = usePageTransition();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [resultFocused, setResultFocused] = useState(false);
+  const [backHovered, setBackHovered] = useState(false);
 
 const editId = searchParams.get("edit");
 const isEditMode = !!editId;
 
-  const [instrument, setInstrument] = useState<"EURUSD" | "GBPUSD">("EURUSD");
-  const [tradeDate, setTradeDate] = useState(getTodayInputValue());
-  const [session, setSession] = useState("London");
-  const [direction, setDirection] = useState<"LONG" | "SHORT">("LONG");
-  const [result, setResult] = useState("");
-  const [comment, setComment] = useState("");
-  const [beforeImage, setBeforeImage] = useState("");
-  const [afterImage, setAfterImage] = useState("");
-  useEffect(() => {
+const [instrument, setInstrument] = useState<"EURUSD" | "GBPUSD">("EURUSD");
+const [tradeDate, setTradeDate] = useState(getTodayInputValue());
+const [session, setSession] = useState("London");
+const [direction, setDirection] = useState<"LONG" | "SHORT">("LONG");
+const [result, setResult] = useState("");
+const [comment, setComment] = useState("");
+const [beforeImage, setBeforeImage] = useState("");
+const [afterImage, setAfterImage] = useState("");
+const [isSaving, setIsSaving] = useState(false);
+
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
+
+useEffect(() => {
   if (!editId) return;
 
   const loadTrade = async () => {
@@ -61,9 +72,6 @@ const isEditMode = !!editId;
     setComment(data.comment || "");
     setBeforeImage(data.before_image || "");
     setAfterImage(data.after_image || "");
-    useEffect(() => {
-  window.scrollTo(0, 0);
-}, []);
   };
 
   loadTrade();
@@ -116,6 +124,8 @@ const isEditMode = !!editId;
   const saveTrade = async () => {
   if (!result.trim()) return;
 
+  setIsSaving(true);
+
   const payload = {
     instrument,
     direction,
@@ -127,35 +137,41 @@ const isEditMode = !!editId;
     after_image: afterImage,
   };
 
-  if (isEditMode) {
-    const { error } = await supabase
-      .from("trades")
-      .update(payload)
-      .eq("id", editId);
+  try {
+    if (isEditMode) {
+      const { error } = await supabase
+        .from("trades")
+        .update(payload)
+        .eq("id", editId);
 
-    if (error) {
-      console.error(error);
-      alert("Error updating trade");
-      return;
-    }
-  } else {
-    const { error } = await supabase
-      .from("trades")
-      .insert([
-        {
-          ...payload,
-          created_at: tradeDateToIso(tradeDate),
-        },
-      ]);
+      if (error) {
+        console.error(error);
+        alert("Error updating trade");
+        setIsSaving(false);
+        return;
+      }
+    } else {
+      const { error } = await supabase
+        .from("trades")
+        .insert([
+          {
+            ...payload,
+            created_at: tradeDateToIso(tradeDate),
+          },
+        ]);
 
-    if (error) {
-      console.error(error);
-      alert("Error saving trade");
-      return;
+      if (error) {
+        console.error(error);
+        alert("Error saving trade");
+        setIsSaving(false);
+        return;
+      }
     }
+
+    navigate("/history");
+  } finally {
+    setIsSaving(false);
   }
-
-  navigate("/history");
 };
 
   const canSave = result.trim() !== "" && !Number.isNaN(Number(result.replace(",", ".")));
@@ -163,14 +179,10 @@ const isEditMode = !!editId;
   return (
     <main
   style={{
-    ...pageStyle, // или pageStyle в других файлах
+    ...pageStyle,
     opacity: animateIn ? 1 : 0,
-    transform: animateIn
-  ? "translateY(0)"
-  : "translateY(16px)",
-
-transition:
-  "opacity 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
+    transform: animateIn ? "translateY(0)" : "translateY(12px)",
+    transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
   }}
 >
       <header style={headerStyle}>
@@ -185,7 +197,13 @@ transition:
     navigate("/");
   }
 }}
-          style={quietButtonStyle}
+          onMouseEnter={() => setBackHovered(true)}
+          onMouseLeave={() => setBackHovered(false)}
+          style={{
+            ...quietButtonStyle,
+            borderColor: backHovered ? colors.borderStrong : colors.border,
+            background: backHovered ? colors.panelSoft : colors.panel,
+          }}
         >
           BACK
         </button>
@@ -262,6 +280,8 @@ transition:
   const value = e.target.value.replace(",", ".");
   setResult(value);
 }}
+          onFocus={() => setResultFocused(true)}
+          onBlur={() => setResultFocused(false)}
           style={{
             ...inputStyle,
             marginBottom: 0,
@@ -269,6 +289,8 @@ transition:
             fontWeight: 900,
             lineHeight: 1,
             textAlign: "center",
+            borderColor: resultFocused ? colors.text : colors.border,
+            background: resultFocused ? colors.panelSoft : colors.panel,
           }}
         />
       </section>
@@ -311,15 +333,15 @@ transition:
       >
         <button
           type="button"
-          disabled={!canSave}
+          disabled={!canSave || isSaving}
           style={{
             ...primaryButtonStyle,
-            opacity: canSave ? 1 : 0.45,
-            cursor: canSave ? "pointer" : "not-allowed",
+            opacity: canSave && !isSaving ? 1 : 0.45,
+            cursor: canSave && !isSaving ? "pointer" : "not-allowed",
           }}
           onClick={saveTrade}
         >
-          {isEditMode ? "SAVE CHANGES" : "SAVE TRADE"}
+          {isSaving ? "SAVING..." : isEditMode ? "SAVE CHANGES" : "SAVE TRADE"}
         </button>
       </div>
     </main>
@@ -352,11 +374,33 @@ function ScreenshotBlock({
   onPaste: (e: ClipboardEvent<HTMLDivElement>) => void;
   onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }) {
+  const [isDragOver, setIsDragOver] = useState(false);
+
   return (
     <section
       tabIndex={0}
       onPaste={onPaste}
       onClick={(e) => e.currentTarget.focus()}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+      }}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file && file.type.startsWith("image")) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const event = {
+              target: { files: [file] },
+            } as unknown as ChangeEvent<HTMLInputElement>;
+            onFileChange(event);
+          };
+          reader.readAsDataURL(file);
+        }
+      }}
       style={sectionStyle}
     >
       <div
@@ -383,13 +427,14 @@ function ScreenshotBlock({
       <div
         style={{
           minHeight: "136px",
-          border: `1px dashed ${colors.borderStrong}`,
+          border: `1px dashed ${isDragOver ? colors.text : colors.borderStrong}`,
           borderRadius: radii.md,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
-          background: colors.bg,
+          background: isDragOver ? colors.panelSoft : colors.bg,
+          transition: "all 0.2s ease",
         }}
       >
         {image ? (
@@ -398,12 +443,14 @@ function ScreenshotBlock({
           <div
             style={{
               color: colors.faint,
-              fontSize: "13px",
-              fontWeight: 800,
-              letterSpacing: "0.08em",
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.04em",
+              textAlign: "center",
+              padding: "16px",
             }}
           >
-            NO IMAGE
+            {isDragOver ? "DROP IMAGE HERE" : "PASTE OR DRAG IMAGE"}
           </div>
         )}
       </div>
@@ -427,17 +474,6 @@ function ScreenshotBlock({
       </label>
     </section>
   );
-}
-
-function getTodayInputValue() {
-  const today = new Date();
-  const offsetMs = today.getTimezoneOffset() * 60000;
-  return new Date(today.getTime() - offsetMs).toISOString().slice(0, 10);
-}
-
-function tradeDateToIso(dateValue: string) {
-  const [year, month, day] = dateValue.split("-").map(Number);
-  return new Date(year, month - 1, day, 12, 0, 0, 0).toISOString();
 }
 
 const twoColumnStyle: CSSProperties = {

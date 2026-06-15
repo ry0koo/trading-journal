@@ -2,7 +2,7 @@ import { supabase } from "../lib/supabase";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { colors } from "../ui";
 import { popRoute } from "../navigationMemory";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, memo } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useRef } from "react";
 import {
@@ -20,15 +20,19 @@ import {
   titleStyle,
   widePageStyle,
 } from "../ui";
+import {
+  getTradeDate,
+  formatDateOnly,
+  formatResultR,
+  formatLocalDateKey,
+  buildWeeksForYear,
+  getLatestMonthForYear,
+  getLatestQuarterForYear,
+  type TradingWeek,
+} from "../utils/dateUtils";
 
 type Period = "week" | "month" | "quarter" | "year" | "all";
 type TradeType = "trades" | "wins" | "losses";
-
-type TradingWeek = {
-  monday: Date;
-  friday: Date;
-  key: string;
-};
 
 type HistoryTrade = Trade & {
   tradeDate?: string;
@@ -56,6 +60,7 @@ type PreviewImage = {
 function History() {
 
   const animateIn = usePageTransition();
+  const [backHovered, setBackHovered] = useState(false);
   const [trades, setTrades] = useState<HistoryTrade[]>([]);
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
   const tradeDetailsRef = useRef<HTMLDivElement | null>(null);
@@ -369,14 +374,10 @@ const MONTHS = [
   return (
   <main
   style={{
-    ...widePageStyle, // или pageStyle в других файлах
+    ...widePageStyle,
     opacity: animateIn ? 1 : 0,
-    transform: animateIn
-  ? "translateY(0)"
-  : "translateY(16px)",
-
-transition:
-  "opacity 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
+    transform: animateIn ? "translateY(0)" : "translateY(12px)",
+    transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
   }}
 >
     <header style={headerStyle}>
@@ -391,7 +392,13 @@ transition:
     navigate("/");
   }
 }}
-        style={quietButtonStyle}
+        onMouseEnter={() => setBackHovered(true)}
+        onMouseLeave={() => setBackHovered(false)}
+        style={{
+          ...quietButtonStyle,
+          borderColor: backHovered ? colors.borderStrong : colors.border,
+          background: backHovered ? colors.panelSoft : colors.panel,
+        }}
       >
         BACK
       </button>
@@ -412,40 +419,40 @@ transition:
 
     <section style={{ ...sectionStyle, marginBottom: "14px" }}>
       <div style={periodGridStyle}>
-        <PeriodButton
+        <MemoizedPeriodButton
           active={activeMode === "week"}
           onClick={() => handleModeClick("week")}
         >
           WEEK
-        </PeriodButton>
+        </MemoizedPeriodButton>
 
-        <PeriodButton
+        <MemoizedPeriodButton
           active={activeMode === "month"}
           onClick={() => handleModeClick("month")}
         >
           MONTH
-        </PeriodButton>
+        </MemoizedPeriodButton>
 
-        <PeriodButton
+        <MemoizedPeriodButton
           active={activeMode === "quarter"}
           onClick={() => handleModeClick("quarter")}
         >
           QUARTER
-        </PeriodButton>
+        </MemoizedPeriodButton>
 
-        <PeriodButton
+        <MemoizedPeriodButton
           active={activeMode === "year"}
           onClick={() => handleModeClick("year")}
         >
           YEAR
-        </PeriodButton>
+        </MemoizedPeriodButton>
 
-        <PeriodButton
+        <MemoizedPeriodButton
           active={activeMode === "all"}
           onClick={() => handleModeClick("all")}
         >
           ALL
-        </PeriodButton>
+        </MemoizedPeriodButton>
       </div>
 
       {activeMode !== "all" && (
@@ -567,12 +574,30 @@ transition:
       {filteredTrades.length === 0 && (
         <div
           style={{
-            opacity: 0.5,
             textAlign: "center",
-            marginTop: "80px",
+            marginTop: "120px",
+            opacity: 0.6,
           }}
         >
-          No trades found
+          <div
+            style={{
+              fontSize: "16px",
+              fontWeight: 600,
+              marginBottom: "8px",
+            }}
+          >
+            No trades found
+          </div>
+          <div
+            style={{
+              fontSize: "13px",
+              opacity: 0.7,
+            }}
+          >
+            {activeMode === "all"
+              ? "Add your first trade to get started"
+              : "No trades in this period"}
+          </div>
         </div>
       )}
 
@@ -995,106 +1020,13 @@ gap: "16px",
   );
   }
 
-function getTradeDate(trade: HistoryTrade) {
-  const source = trade.tradeDate || trade.createdAt;
-  const date = new Date(source);
-
-  if (Number.isNaN(date.getTime())) {
-    return new Date(trade.createdAt);
-  }
-
-  return date;
-}
-
-function buildWeeksForYear(trades: HistoryTrade[], year: number): TradingWeek[] {
-  const weekMap = new Map<string, TradingWeek>();
-
-  trades.forEach((trade) => {
-    const date = getTradeDate(trade);
-
-    if (date.getFullYear() !== year) {
-      return;
-    }
-
-    const monday = new Date(date);
-    monday.setHours(0, 0, 0, 0);
-
-    const day = monday.getDay();
-    monday.setDate(monday.getDate() - (day === 0 ? 6 : day - 1));
-
-    const friday = new Date(monday);
-    friday.setDate(monday.getDate() + 4);
-    friday.setHours(23, 59, 59, 999);
-
-    const key = formatLocalDateKey(monday);
-
-    if (!weekMap.has(key)) {
-      weekMap.set(key, {
-        monday,
-        friday,
-        key,
-      });
-    }
-  });
-
-  return Array.from(weekMap.values()).sort(
-    (a, b) => b.monday.getTime() - a.monday.getTime()
-  );
-}
-
-function getLatestMonthForYear(trades: HistoryTrade[], year: number) {
-  const months = trades
-    .filter((trade) => getTradeDate(trade).getFullYear() === year)
-    .map((trade) => getTradeDate(trade).getMonth());
-
-  if (months.length === 0) {
-    return new Date().getMonth();
-  }
-
-  return Math.max(...months);
-}
-
-function getLatestQuarterForYear(trades: HistoryTrade[], year: number) {
-  const quarters = trades
-    .filter((trade) => getTradeDate(trade).getFullYear() === year)
-    .map((trade) => Math.floor(getTradeDate(trade).getMonth() / 3) + 1);
-
-  if (quarters.length === 0) {
-    return Math.floor(new Date().getMonth() / 3) + 1;
-  }
-
-  return Math.max(...quarters);
-}
-
 function sortTradesDesc(a: HistoryTrade, b: HistoryTrade) {
   return getTradeDate(b).getTime() - getTradeDate(a).getTime();
-}
-
-function formatLocalDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
 }
 
 function parseLocalDateKey(value: string) {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(year, month - 1, day);
-}
-
-function formatResultR(value: number) {
-  const rounded = Math.round(value * 100) / 100;
-  const text = Number.isInteger(rounded)
-    ? String(rounded)
-    : rounded.toFixed(2).replace(/\.?0+$/, "");
-  return `${rounded >= 0 ? "+" : ""}${text}R`;
-}
-
-function formatDateOnly(date: Date) {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}.${month}.${year}`;
 }
 
 function PeriodButton({
@@ -1116,6 +1048,8 @@ function PeriodButton({
     </button>
   );
 }
+
+const MemoizedPeriodButton = memo(PeriodButton);
 
 function ImageBlock({
   title,
