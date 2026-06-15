@@ -31,9 +31,6 @@ function Statistics() {
   const [selectedQuarter, setSelectedQuarter] = useState(1);
   const [selectedWeek, setSelectedWeek] = useState(0);
 
-  // For graph interaction (select then navigate)
-  const [selectedPointKey, setSelectedPointKey] = useState<string | null>(null);
-
   // ── Derived filter options ──────────────────────────────────────────────
   const years = useMemo(() => {
     const set = new Set(trades.map((t) => getTradeDate(t).getFullYear()));
@@ -159,11 +156,7 @@ function Statistics() {
   };
 
   const handlePointClick = (point: { dayKey: string }) => {
-    if (selectedPointKey === point.dayKey) {
-      navigate(`/history?day=${point.dayKey}`);
-    } else {
-      setSelectedPointKey(point.dayKey);
-    }
+    navigate(`/history?day=${point.dayKey}`);
   };
 
   const handleSessionClick = (session: string) => {
@@ -220,7 +213,6 @@ function Statistics() {
         <EquityChart
           data={equityCurveData}
           onPointClick={handlePointClick}
-          selectedPointKey={selectedPointKey}
         />
       </div>
 

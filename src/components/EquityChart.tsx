@@ -14,7 +14,6 @@ import type { EquityPoint } from "../utils/chartUtils";
 interface EquityChartProps {
   data: EquityPoint[];
   onPointClick?: (point: EquityPoint) => void;
-  selectedPointKey?: string | null;
 }
 
 interface CustomTooltipProps {
@@ -70,7 +69,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   );
 }
 
-export function EquityChart({ data, onPointClick, selectedPointKey }: EquityChartProps) {
+export function EquityChart({ data, onPointClick }: EquityChartProps) {
   const lastEquity = data.length > 0 ? data[data.length - 1].equity : 0;
   const isPositive = lastEquity >= 0;
   const lineColor = isPositive ? "var(--green)" : "var(--red)";
@@ -179,25 +178,7 @@ export function EquityChart({ data, onPointClick, selectedPointKey }: EquityChar
             stroke={lineColor}
             strokeWidth={3}
             fill={`url(#${fillId})`}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            dot={(props: any) => {
-              const { cx, cy, payload } = props;
-              if (payload && payload.dayKey === selectedPointKey) {
-                return (
-                  <circle
-                    key={`dot-${payload.dayKey}`}
-                    cx={cx}
-                    cy={cy}
-                    r={6}
-                    fill={lineColor}
-                    stroke="var(--bg)"
-                    strokeWidth={3}
-                    style={{ filter: "drop-shadow(0 0 8px currentColor)" }}
-                  />
-                );
-              }
-              return null;
-            }}
+            dot={false}
             activeDot={{
               r: 6,
               fill: lineColor,
