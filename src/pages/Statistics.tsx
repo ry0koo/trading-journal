@@ -71,7 +71,7 @@ function Statistics() {
   const [selectedQuarter, setSelectedQuarter] = useState(1);
   const [selectedWeek, setSelectedWeek] = useState(0);
 
-  
+
   const loadTrades = async () => {
   const { data, error } = await supabase
     .from("trades")
@@ -803,13 +803,7 @@ function EquityChart({
     left: 0,
     bottom: 0,
   }}
-  onClick={(state: any) => {
-    const point = state?.activePayload?.[0]?.payload;
-
-    if (point && onPointClick) {
-      onPointClick(point);
-    }
-  }}
+  
 >
           <defs>
             <linearGradient id="equityFill" x1="0" y1="0" x2="0" y2="1">
@@ -869,12 +863,23 @@ function EquityChart({
 />
 
           <Area
-            type="linear"
-            dataKey="equity"
-            stroke="#4ade80"
-            strokeWidth={1.5}
-            fill="url(#equityFill)"
-          />
+  type="linear"
+  dataKey="equity"
+  stroke="#4ade80"
+  strokeWidth={1.5}
+  fill="url(#equityFill)"
+  activeDot={{
+    r: 6,
+    onClick: (_event: any, payload: any) => {
+      if (payload?.payload && onPointClick) {
+        onPointClick(payload.payload);
+      }
+    },
+    style: {
+      cursor: "pointer",
+    },
+  }}
+/>
         </AreaChart>
       </ResponsiveContainer>
     </div>
