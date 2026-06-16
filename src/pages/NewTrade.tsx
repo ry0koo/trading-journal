@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { useTrades } from "../hooks/useTrades";
 import { BackButton } from "../components/BackButton";
 import { PageWrapper } from "../components/PageWrapper";
 import {
@@ -18,6 +19,7 @@ import { ScreenshotUpload } from "../components/ScreenshotUpload";
 function NewTrade() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { refetch } = useTrades();
   const [resultFocused, setResultFocused] = useState(false);
 
   const editId = searchParams.get("edit");
@@ -297,4 +299,3 @@ function DirectionButton({ active, onClick, label, activeColor }: { active: bool
 }
 
 export default NewTrade;
-lt NewTrade;
