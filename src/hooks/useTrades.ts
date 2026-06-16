@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, createContext, useContext, ReactNode } from "react";
 import { supabase } from "../lib/supabase";
 import type { Trade } from "../types/trade";
 
@@ -41,16 +41,23 @@ function writePersistentCache(trades: Trade[]) {
   }
 }
 
+interface TradesContextType {
+  trades: Trade[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+const TradesContext = createContext<TradesContextType | undefined>(undefined);
+
 /**
- * Unified hook — single source of truth for all trade data.
- * Implements Stale-While-Revalidate caching and request deduplication.
+ * TradesProvider manages the global state for all trade data.
+ * It preloads data immediately on mount and handles realtime updates.
  */
-export function useTrades() {
-  const [trades, setTrades] = useState<Trade[]>(() => {
-    if (globalCache) return globalCache;
-    return readPersistentCache();
-  });
-  const [loading, setLoading] = useState(!globalCache);
+export function TradesProvider({ children }: { children: ReactNode }) {
+  const initialTrades = globalCache || readPersistentCache();
+  const [trades, setTrades] = useState<Trade[]>(initialTrades);
+  const [loading, setLoading] = useState(!initialTrades.length);
   const [error, setError] = useState<string | null>(null);
   
   const isFetchingRef = useRef(false);
@@ -67,7 +74,11 @@ export function useTrades() {
     }
 
     isFetchingRef.current = true;
-    setLoading(true);
+    
+    // Only show loading if we have no data at all
+    if (!globalCache && readPersistentCache().length === 0) {
+      setLoading(true);
+    }
 
     const { data, error: supaErr } = await supabase
       .from("trades")
@@ -95,11 +106,8 @@ export function useTrades() {
   }, []);
 
   useEffect(() => {
-    // Initial fetch (stale-while-revalidate handled by default)
-    // Defer execution to avoid sync setState in effect lint error
-    const timer = setTimeout(() => {
-      void fetchTrades();
-    }, 0);
+    // Initial preload — happens immediately when app starts
+    void fetchTrades();
 
     const channel = supabase
       .channel("trades-global")
@@ -114,10 +122,33 @@ export function useTrades() {
       .subscribe();
 
     return () => {
-      clearTimeout(timer);
       supabase.removeChannel(channel);
     };
   }, [fetchTrades]);
 
-  return { trades, loading, error, refetch: () => fetchTrades(true) };
+  const contextValue = {
+    trades,
+    loading,
+    error,
+    refetch: () => fetchTrades(true)
+  };
+
+  return (
+    <TradesContext.Provider value={contextValue}>
+      {children}
+    </TradesContext.Provider>
+  );
 }
+
+/**
+ * Unified hook — consumes the global TradesProvider.
+ * Provides instant access to preloaded and cached trade data.
+ */
+export function useTrades() {
+  const context = useContext(TradesContext);
+  if (context === undefined) {
+    throw new Error("useTrades must be used within a TradesProvider");
+  }
+  return context;
+}
+

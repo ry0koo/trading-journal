@@ -34,7 +34,7 @@ const MONTHS = [
 function History() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { trades, loading } = useTrades();
+  const { trades, loading, refetch } = useTrades();
 
   const [selectedTradeId, setSelectedTradeId] = useState<string | null>(null);
   const [showMenuId, setShowMenuId] = useState<string | null>(null);
@@ -174,6 +174,7 @@ function History() {
   // ── Actions ──────────────────────────────────────────────────────────────
   const deleteTrade = async (id: string) => {
     await supabase.from("trades").delete().eq("id", id);
+    void refetch();
     if (selectedTradeId === id) setSelectedTradeId(null);
   };
 

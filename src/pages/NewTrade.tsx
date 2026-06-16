@@ -106,6 +106,7 @@ function NewTrade() {
         if (error) throw error;
       }
 
+      void refetch();
       navigate("/history");
     } catch {
       setSaveError("Failed to save. Please try again.");
@@ -296,3 +297,4 @@ function DirectionButton({ active, onClick, label, activeColor }: { active: bool
 }
 
 export default NewTrade;
+lt NewTrade;

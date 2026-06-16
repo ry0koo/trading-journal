@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect, useLayoutEffect } from "react";
 import type { ReactNode } from "react";
 import { pushRoute } from "./navigationMemory";
+import { TradesProvider } from "./hooks/useTrades";
 import Home from "./pages/Home";
 import NewTrade from "./pages/NewTrade";
 import Statistics from "./pages/Statistics";
@@ -30,17 +31,19 @@ function RouteTracker({ children }: { children: ReactNode }) {
 function App() {
 
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <RouteTracker>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/new-trade" element={<NewTrade />} />
-          <Route path="/statistics" element={<Statistics />} />
-          <Route path="/history" element={<History />} />
-        </Routes>
-      </RouteTracker>
-    </BrowserRouter>
+    <TradesProvider>
+      <BrowserRouter>
+        <ScrollToTop />
+        <RouteTracker>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/new-trade" element={<NewTrade />} />
+            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/history" element={<History />} />
+          </Routes>
+        </RouteTracker>
+      </BrowserRouter>
+    </TradesProvider>
   );
 }
 
